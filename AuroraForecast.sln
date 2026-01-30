@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36908.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuroraForecast", "AuroraForecast.csproj", "{52EADAD4-4A05-1F17-78FE-EBBD063CE15A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52EADAD4-4A05-1F17-78FE-EBBD063CE15A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52EADAD4-4A05-1F17-78FE-EBBD063CE15A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52EADAD4-4A05-1F17-78FE-EBBD063CE15A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52EADAD4-4A05-1F17-78FE-EBBD063CE15A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {72E6B4C0-3C19-4547-994B-8F5671D854EF}
+	EndGlobalSection
+EndGlobal
