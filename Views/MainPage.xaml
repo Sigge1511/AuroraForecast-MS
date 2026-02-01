@@ -28,9 +28,11 @@
         </BoxView>
 
         <ScrollView VerticalScrollBarVisibility="Never">
-            <VerticalStackLayout Padding="30,10,30,20" Spacing="40">
-
-                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+            <VerticalStackLayout Padding="30,25,30,20" Spacing="40">
+                
+                <!--TOP LABEL-->
+                <VerticalStackLayout Spacing="5" 
+                                     HorizontalOptions="Center">
                     <Label Text="AURORA FORECAST" 
                            CharacterSpacing="6"
                            FontSize="20" 
@@ -38,19 +40,23 @@
                            HorizontalOptions="Center" 
                            FontFamily="MontserratBold"/>
                 </VerticalStackLayout>
-
+                
+                <!--SEARCH CITY HERE--> 
                 <Grid ColumnDefinitions="*, Auto" Margin="10,0">
-                    <Entry x:Name="CityEntry"
-                           Text="{Binding CityName}"
-                           Placeholder="Search location..."
-                           PlaceholderColor="#50FFFFFF"
-                           TextColor="White"
-                           FontFamily="Montserrat"
-                           FontSize="18"
-                           BackgroundColor="Transparent"
-                           Completed="OnSearchClicked" />
-                    <BoxView Grid.ColumnSpan="2" HeightRequest="1" Color="#30FFFFFF" VerticalOptions="End" />
-
+                    <Border Stroke="#40FFFFFF"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8">
+                        <Entry x:Name="CityEntry"
+                               Text="{Binding CityName}"
+                               Placeholder="Search location..."
+                               PlaceholderColor="#50FFFFFF"
+                               TextColor="White"
+                               FontFamily="Montserrat"
+                               FontSize="18"
+                               BackgroundColor="Transparent"
+                               Completed="OnSearchClicked" >                        
+                        </Entry>
+                    </Border>                    
                     <Button Grid.Column="1"
                             Text="GO"
                             Margin="10,0,0,0"
@@ -59,71 +65,101 @@
                             TextColor="#2DCCAA"
                             FontFamily="MontserratBold"
                             FontSize="14"
-                            Padding="15,0" />
-                    
+                            Padding="15,0" />                    
                 </Grid>
-
+                
+                <!--CIRCLE WITH RESULT-->
                 <Grid HeightRequest="300" WidthRequest="300" HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}">
-
-                    <Path Stroke="#2DCCAA" 
-                            StrokeThickness="12" 
-                                 StrokeLineCap="Round"
-                              HorizontalOptions="Center"
-                              VerticalOptions="Center"
-                           StrokeDashArray="{Binding StrokeDashValues}">
+                    <Path Stroke="#20FFFFFF" 
+                         StrokeThickness="12" 
+                           StrokeLineCap="Round">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="150,20">
-                                    <ArcSegment Point="149.9,20" 
-                            Size="130,130" 
-                            IsLargeArc="True" 
-                            SweepDirection="Clockwise" />
+                                <PathFigure StartPoint="140,10">
+                                    <ArcSegment Point="139.9,10" 
+                                Size="130,130" 
+                                IsLargeArc="True" 
+                                SweepDirection="Clockwise" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+                    <Path Stroke="#2DCCAA" 
+                            StrokeThickness="12" 
+                           StrokeLineCap="Round"
+                            StrokeDashArray="{Binding StrokeDashValues}">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure StartPoint="140,10">
+                                    <ArcSegment Point="139.9,10" 
+                                Size="130,130" 
+                                IsLargeArc="True" 
+                                SweepDirection="Clockwise" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
                     </Path>
 
                     <VerticalStackLayout VerticalOptions="Center" 
-                                         HorizontalOptions="Center">
-                        <Label Text="KP INDEX" 
-                               FontSize="20" 
-                               TextColor="#70FFFFFF" 
-                               HorizontalOptions="Center" CharacterSpacing="4" FontFamily="Montserrat"/>
-                        <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}" 
-                               FontSize="100" 
-                               TextColor="White" 
+                                         HorizontalOptions="Center" 
+                                         Margin="-10,5,0,0">
+                        <Label Text="PROBABILITY" 
+                               FontSize="15" TextColor="#70FFFFFF" 
+                               HorizontalOptions="Center" 
+                               CharacterSpacing="4" FontFamily="Montserrat"/>
+                        <Label Text="{Binding Probability, StringFormat='{0:F0}%'}" 
+                               FontSize="90" TextColor="White" 
                                FontFamily="MontserratBold" 
                                HorizontalOptions="Center">
                             <Label.Shadow>
-                                <Shadow Brush="#2DCCAA" Offset="0,0" Radius="40" Opacity="0.7" />
+                                <Shadow Brush="#2DCCAA" Offset="0,0" Radius="30" Opacity="0.6" />
                             </Label.Shadow>
                         </Label>
                         <Label Text="{Binding ActivityLevel}" 
-                               FontSize="18" 
-                               TextColor="#2DCCAA" 
-                               FontFamily="MontserratBold"
+                               FontSize="35" 
                                HorizontalOptions="Center" 
-                               TextTransform="Uppercase"
-                               CharacterSpacing="2"/>
+                               TextColor="#2DCCAA" 
+                               FontAttributes="Bold"
+                               Margin="0,-20,0,0"/>
+                        <Label Text="KP INDEX: " 
+                               FontSize="15" 
+                               HorizontalOptions="Center" 
+                               TextColor="#2DCCAA"
+                               Margin="0,5,0,0"/>
+                        <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}" 
+                               FontSize="15" 
+                               HorizontalOptions="Center" 
+                               TextColor="Gray"/>
                     </VerticalStackLayout>
                 </Grid>
-
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="20" IsVisible="{Binding IsDataLoaded}">
-                    <Border StrokeShape="RoundRectangle 25" BackgroundColor="#0AFFFFFF" Padding="20" Stroke="Transparent">
+                
+                <!--MORE INFO FROM RESULT-->
+                <Grid ColumnDefinitions="*,*" 
+                      ColumnSpacing="20" 
+                      IsVisible="{Binding IsDataLoaded}">
+                    <Border StrokeShape="RoundRectangle 25" 
+                            BackgroundColor="#0AFFFFFF" 
+                            Padding="20" Stroke="Transparent">
                         <VerticalStackLayout Spacing="5">
-                            <Label Text="CHANCE" FontSize="11" TextColor="#60FFFFFF" HorizontalOptions="Center" FontFamily="Montserrat"/>
+                            <Label Text="CHANCE" 
+                                   FontSize="11" 
+                                   TextColor="#60FFFFFF" 
+                                   HorizontalOptions="Center" FontFamily="Montserrat"/>
                             <Label Text="{Binding Probability, StringFormat='{0}%'}" FontSize="32" TextColor="White" FontFamily="MontserratBold" HorizontalOptions="Center"/>
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Grid.Column="1" StrokeShape="RoundRectangle 25" BackgroundColor="#0AFFFFFF" Padding="20" Stroke="Transparent">
+                    <Border Grid.Column="1" 
+                            StrokeShape="RoundRectangle 25" 
+                            BackgroundColor="#0AFFFFFF" Padding="20" Stroke="Transparent">
                         <VerticalStackLayout Spacing="5">
                             <Label Text="LOCATION" FontSize="11" TextColor="#60FFFFFF" HorizontalOptions="Center" FontFamily="Montserrat"/>
                             <Label Text="{Binding CityName}" FontSize="18" TextColor="White" FontFamily="MontserratBold" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
-
+                
+                <!--3 DAY PROGNOSIS-->
                 <VerticalStackLayout Spacing="20" IsVisible="{Binding IsDataLoaded}">
                     <Label Text="3-DAY PROGNOSIS" FontSize="12" CharacterSpacing="3" TextColor="#60FFFFFF" Margin="5,0" FontFamily="MontserratBold"/>
 
@@ -148,7 +184,8 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </VerticalStackLayout>
-
+                
+                <!--PROPPS TO NOAA-->
                 <Label Text="SOURCE: NOAA SPACE WEATHER" FontSize="10" TextColor="#20FFFFFF" HorizontalOptions="Center" FontFamily="Montserrat" Margin="0,20"/>
 
             </VerticalStackLayout>
