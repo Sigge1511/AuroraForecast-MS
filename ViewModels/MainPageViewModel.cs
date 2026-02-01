@@ -34,28 +34,28 @@ public partial class MainPageViewModel : BaseViewModel
     private string locationInfo = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<ForecastDay> forecastItems;
+    private bool isDataLoaded;
 
     [ObservableProperty]
-    private bool isDataLoaded;
+    private ObservableCollection<ForecastDay> threeDayForecast; 
 
     public MainPageViewModel()
     {
         _auroraService = new AuroraService();
         _geocodingService = new GeocodingService();
         _videoService = new VideoService();
-        
+
         Title = "Aurora Forecast";
-        ForecastItems = new ObservableCollection<ForecastDay>();
-        
+        ThreeDayForecast = new ObservableCollection<ForecastDay>(); // Ändrat från ForecastItems
+
         CurrentVideoSource = "aurora_low.mp4";
-        
+
         _ = LoadDefaultLocationAsync();
     }
 
     private async Task LoadDefaultLocationAsync()
     {
-        CityName = "Uppsala";
+        CityName = "Östersund";
         await SearchCityAsync();
     }
 
@@ -78,7 +78,7 @@ public partial class MainPageViewModel : BaseViewModel
             IsDataLoaded = false;
 
             var location = await _geocodingService.GetLocationFromCityAsync(CityName);
-            
+
             if (location == null)
             {
                 SetError($"Kunde inte hitta stad: {CityName}");
@@ -97,15 +97,16 @@ public partial class MainPageViewModel : BaseViewModel
             ActivityLevel = forecast.ActivityLevel;
             ActivityDescription = forecast.GetActivityDescription();
             Probability = forecast.Probability;
-
             CurrentVideoSource = _videoService.GetVideoSourceUri(forecast.KpIndex);
 
-            var threeDayForecast = await _auroraService.GetThreeDayForecastAsync();
-            
-            ForecastItems.Clear();
-            foreach (var day in threeDayForecast)
+            // Hämta 3-dagars prognos
+            var forecastDays = await _auroraService.GetThreeDayForecastAsync(location.Latitude);
+
+            // Uppdatera ObservableCollection
+            ThreeDayForecast.Clear();
+            foreach (var day in forecastDays)
             {
-                ForecastItems.Add(day);
+                ThreeDayForecast.Add(day);
             }
 
             IsDataLoaded = true;

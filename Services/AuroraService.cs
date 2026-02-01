@@ -1,6 +1,6 @@
-using System.Net.Http.Json;
-using System.Text.Json;
 using AuroraForecast.Models;
+using System.Collections.ObjectModel;
+using System.Text.Json;
 
 namespace AuroraForecast.Services;
 
@@ -8,14 +8,10 @@ public class AuroraService
 {
     private readonly HttpClient _httpClient;
     private const string KpIndexUrl = "https://services.swpc.noaa.gov/json/planetary_k_index_1m.json";
-    private const string KpForecastUrl = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json";
 
     public AuroraService()
     {
-        _httpClient = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(30)
-        };
+        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
     }
 
     public async Task<double> GetCurrentKpIndexAsync()
@@ -24,100 +20,183 @@ public class AuroraService
         {
             var response = await _httpClient.GetStringAsync(KpIndexUrl);
             var jsonArray = JsonSerializer.Deserialize<JsonElement[]>(response);
-            
+
             if (jsonArray != null && jsonArray.Length > 0)
             {
-                var latest = jsonArray[^1];
-                
-                if (latest.TryGetProperty("kp_index", out var kpValue))
+                // Loopa bakåt och hitta första med estimated_kp > 0
+                for (int i = jsonArray.Length - 1; i >= 0; i--)
                 {
-                    return kpValue.GetDouble();
-                }
-                
-                if (latest.TryGetProperty("Kp", out var kpAlt))
-                {
-                    return kpAlt.GetDouble();
+                    if (jsonArray[i].TryGetProperty("estimated_kp", out var est))
+                    {
+                        var val = est.GetDouble();
+                        if (val > 0) return val;
+                    }
                 }
             }
-            
             return 0;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error fetching Kp index: {ex.Message}");
-            return 2.5; // Fallback värde
+            System.Diagnostics.Debug.WriteLine($"Error fetching Kp: {ex.Message}");
+            return 0;
         }
     }
 
-    public async Task<List<ForecastDay>> GetThreeDayForecastAsync()
+    public async Task<ObservableCollection<ForecastDay>> GetThreeDayForecastAsync(double latitude)
     {
         try
         {
-            var response = await _httpClient.GetStringAsync(KpForecastUrl);
-            var lines = response.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            
-            var forecasts = new List<ForecastDay>();
-            var today = DateTime.UtcNow.Date;
-            
-            foreach (var line in lines.Skip(1))
+            System.Diagnostics.Debug.WriteLine($"=== GetThreeDayForecast called with latitude: {latitude} ===");
+
+            var url = "https://services.swpc.noaa.gov/text/3-day-geomag-forecast.txt";
+            var response = await _httpClient.GetStringAsync(url);
+            var lines = response.Split('\n');
+
+            // Hitta Kp-prognos sektionen
+            var kpSectionStart = -1;
+            for (int i = 0; i < lines.Length; i++)
             {
-                if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line))
-                    continue;
-                
-                var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                
-                if (parts.Length >= 3 && double.TryParse(parts[2], out var kp))
+                if (lines[i].Contains("NOAA Kp index forecast"))
                 {
-                    if (forecasts.Count < 3)
-                    {
-                        var forecastDate = today.AddDays(forecasts.Count);
-                        forecasts.Add(new ForecastDay
-                        {
-                            Date = forecastDate.ToString("ddd dd MMM"),
-                            KpIndex = kp,
-                            ActivityLevel = GetActivityLevel(kp),
-                            IconEmoji = GetIconEmoji(kp)
-                        });
-                    }
+                    kpSectionStart = i;
+                    break;
                 }
             }
-            
-            if (forecasts.Count == 0)
+
+            if (kpSectionStart == -1)
             {
-                for (int i = 0; i < 3; i++)
+                System.Diagnostics.Debug.WriteLine("=== KP SECTION NOT FOUND ===");
+                return GetFallbackForecast(latitude);
+            }
+
+            // Datumraden är 1 rad efter "NOAA Kp index forecast"
+            var dateLineIndex = kpSectionStart + 1;
+            if (dateLineIndex >= lines.Length)
+            {
+                System.Diagnostics.Debug.WriteLine("=== DATE LINE NOT FOUND ===");
+                return GetFallbackForecast(latitude);
+            }
+
+            var dateLine = lines[dateLineIndex].Trim();
+            var dateParts = dateLine.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            System.Diagnostics.Debug.WriteLine($"=== Date parts count: {dateParts.Length} ===");
+
+            if (dateParts.Length < 6)
+            {
+                System.Diagnostics.Debug.WriteLine("=== NOT ENOUGH DATE PARTS ===");
+                return GetFallbackForecast(latitude);
+            }
+
+            // Samla alla Kp-värden per dag
+            var day1Values = new List<double>();
+            var day2Values = new List<double>();
+            var day3Values = new List<double>();
+
+            // Läs 8 timmars-rader (00-03UT till 21-00UT)
+            for (int i = kpSectionStart + 2; i < Math.Min(kpSectionStart + 10, lines.Length); i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line)) continue;
+
+                var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length >= 4)
                 {
-                    forecasts.Add(new ForecastDay
-                    {
-                        Date = today.AddDays(i).ToString("ddd dd MMM"),
-                        KpIndex = 2.5,
-                        ActivityLevel = "Low",
-                        IconEmoji = "🌙"
-                    });
+                    if (double.TryParse(parts[1], System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var kp1))
+                        day1Values.Add(kp1);
+
+                    if (double.TryParse(parts[2], System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var kp2))
+                        day2Values.Add(kp2);
+
+                    if (double.TryParse(parts[3], System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var kp3))
+                        day3Values.Add(kp3);
                 }
             }
-            
-            return forecasts;
+
+            System.Diagnostics.Debug.WriteLine($"=== Day1: {day1Values.Count} values, Day2: {day2Values.Count}, Day3: {day3Values.Count} ===");
+
+            // Bygg forecast med sannolikhet per dag
+            var forecasts = new ObservableCollection<ForecastDay>();
+
+            if (day1Values.Any())
+            {
+                var avgKp = day1Values.Average();
+                var prob = CalculateProbability(avgKp, latitude);
+                System.Diagnostics.Debug.WriteLine($"=== Day 1: Kp={avgKp:F1}, Prob={prob}% ===");
+
+                forecasts.Add(new ForecastDay
+                {
+                    Date = $"{dateParts[0]} {dateParts[1]}",
+                    KpIndex = Math.Round(avgKp, 1),
+                    Probability = prob,
+                    ActivityLevel = GetActivityLevel(avgKp),
+                    IconEmoji = GetIconEmoji(avgKp)
+                });
+            }
+
+            if (day2Values.Any())
+            {
+                var avgKp = day2Values.Average();
+                var prob = CalculateProbability(avgKp, latitude);
+                System.Diagnostics.Debug.WriteLine($"=== Day 2: Kp={avgKp:F1}, Prob={prob}% ===");
+
+                forecasts.Add(new ForecastDay
+                {
+                    Date = $"{dateParts[2]} {dateParts[3]}",
+                    KpIndex = Math.Round(avgKp, 1),
+                    Probability = prob,
+                    ActivityLevel = GetActivityLevel(avgKp),
+                    IconEmoji = GetIconEmoji(avgKp)
+                });
+            }
+
+            if (day3Values.Any())
+            {
+                var avgKp = day3Values.Average();
+                var prob = CalculateProbability(avgKp, latitude);
+                System.Diagnostics.Debug.WriteLine($"=== Day 3: Kp={avgKp:F1}, Prob={prob}% ===");
+
+                forecasts.Add(new ForecastDay
+                {
+                    Date = $"{dateParts[4]} {dateParts[5]}",
+                    KpIndex = Math.Round(avgKp, 1),
+                    Probability = prob,
+                    ActivityLevel = GetActivityLevel(avgKp),
+                    IconEmoji = GetIconEmoji(avgKp)
+                });
+            }
+
+            System.Diagnostics.Debug.WriteLine($"=== Returning {forecasts.Count} forecasts ===");
+            return forecasts.Count == 3 ? forecasts : GetFallbackForecast(latitude);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error fetching forecast: {ex.Message}");
-            
-            var forecasts = new List<ForecastDay>();
-            var today = DateTime.UtcNow.Date;
-            
-            for (int i = 0; i < 3; i++)
-            {
-                forecasts.Add(new ForecastDay
-                {
-                    Date = today.AddDays(i).ToString("ddd dd MMM"),
-                    KpIndex = 2.5,
-                    ActivityLevel = "Low",
-                    IconEmoji = "🌙"
-                });
-            }
-            
-            return forecasts;
+            System.Diagnostics.Debug.WriteLine($"=== EXCEPTION: {ex.Message} ===");
+            System.Diagnostics.Debug.WriteLine($"=== STACK: {ex.StackTrace} ===");
+            return GetFallbackForecast(latitude);
         }
+    }
+
+    private ObservableCollection<ForecastDay> GetFallbackForecast(double latitude)
+    {
+        var forecasts = new ObservableCollection<ForecastDay>();
+        var today = DateTime.UtcNow.Date;
+        for (int i = 0; i < 3; i++)
+        {
+            forecasts.Add(new ForecastDay
+            {
+                Date = today.AddDays(i).ToString("ddd dd MMM"),
+                KpIndex = 0,
+                Probability = 0,
+                ActivityLevel = "Low",
+                IconEmoji = "🌙"
+            });
+        }
+        return forecasts;
     }
 
     public static string GetActivityLevel(double kp)
@@ -145,7 +224,7 @@ public class AuroraService
     public async Task<Models.AuroraForecast> GetForecastForLocationAsync(string cityName, double latitude, double longitude)
     {
         var kpIndex = await GetCurrentKpIndexAsync();
-        
+
         return new Models.AuroraForecast
         {
             ForecastTime = DateTime.UtcNow,
@@ -161,7 +240,7 @@ public class AuroraService
     private int CalculateProbability(double kp, double latitude)
     {
         var absLat = Math.Abs(latitude);
-        
+
         int baseProbability = kp switch
         {
             >= 7 => 90,
@@ -169,11 +248,11 @@ public class AuroraService
             >= 3 => 40,
             _ => 15
         };
-        
+
         if (absLat > 65) baseProbability = Math.Min(100, baseProbability + 20);
         else if (absLat > 55) baseProbability = Math.Min(100, baseProbability + 10);
         else if (absLat < 45) baseProbability = Math.Max(0, baseProbability - 20);
-        
+
         return baseProbability;
     }
 }

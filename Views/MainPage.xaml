@@ -33,7 +33,7 @@
                 
                 <!-- Header -->
                 <Label 
-                    Text="🌌 Aurora Forecast"
+                    Text="Aurora Forecast"
                     FontSize="32"
                     FontAttributes="Bold"
                     TextColor="White"
@@ -47,7 +47,7 @@
                        HasShadow="True">
                     <VerticalStackLayout Spacing="10">
                         <Label 
-                            Text="Sök efter stad"
+                            Text="Search for a nordic location/town:"
                             FontSize="16"
                             TextColor="White"
                             FontAttributes="Bold" />
@@ -56,11 +56,12 @@
                             <Entry 
                                 x:Name="CityEntry"
                                 Text="{Binding CityName}"
-                                Placeholder="T.ex. Uppsala, Kiruna..."
+                                Placeholder="T.ex. Östersund, Kiruna..."
                                 PlaceholderColor="#CCFFFFFF"
                                 TextColor="White"
+                                MinimumWidthRequest="100"
                                 BackgroundColor="#60000000"
-                                HorizontalOptions="FillAndExpand"
+                                HorizontalOptions="Fill"
                                 Completed="OnSearchClicked" />
                             
                             <Button 
@@ -104,7 +105,7 @@
                     <VerticalStackLayout Spacing="15">
                         
                         <Label 
-                            Text="📍 Aktuell Prognos"
+                            Text="📍 Current prognosis"
                             FontSize="20"
                             FontAttributes="Bold"
                             TextColor="White" />
@@ -132,7 +133,7 @@
 
                             <VerticalStackLayout Grid.Column="1" Spacing="5">
                                 <Label 
-                                    Text="Sannolikhet"
+                                    Text="Probability"
                                     FontSize="14"
                                     TextColor="#E0E0E0" />
                                 <Label 
@@ -176,46 +177,55 @@
                     <VerticalStackLayout Spacing="15">
                         
                         <Label 
-                            Text="📅 3-Dagars Prognos"
+                            Text="📅 3 day prognosis"
                             FontSize="20"
                             FontAttributes="Bold"
-                            TextColor="White" />
+                            TextColor="White" />                            
+                            <CollectionView ItemsSource="{Binding ThreeDayForecast}"
+                                            SelectionMode="None">
 
-                        <CollectionView ItemsSource="{Binding ForecastItems}">
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="model:ForecastDay">
-                                    <Frame 
-                                        BackgroundColor="#40000000"
-                                        CornerRadius="10"
-                                        Padding="15"
-                                        Margin="0,5">
-                                        <Grid ColumnDefinitions="50,*,80" ColumnSpacing="10">
-                                            <Label 
-                                                Grid.Column="0"
-                                                Text="{Binding IconEmoji}"
-                                                FontSize="30"
-                                                VerticalOptions="Center" />
-                                            
-                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                                <Label 
-                                                    Text="{Binding Date}"
-                                                    FontSize="16"
-                                                    FontAttributes="Bold"
-                                                    TextColor="White" />
-                                                <Label 
-                                                    Text="{Binding ActivityLevel}"
-                                                    FontSize="12"
-                                                    TextColor="#E0E0E0" />
+                                <DataTemplate>
+                                    <Frame BackgroundColor="#3A3A3A" 
+                                           Margin="0,5"
+                                            Padding="15"
+                                             CornerRadius="10">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="15">
+
+                                            <!-- Icon -->
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding IconEmoji}"
+                                                   FontSize="32"
+                                                   VerticalOptions="Center" />
+
+                                            <!-- Date & Activity -->
+                                            <VerticalStackLayout Grid.Column="1" 
+                                                 VerticalOptions="Center"
+                                                 Spacing="2">
+                                                <Label Text="{Binding Date}"
+                                                        FontSize="16"
+                                                      FontAttributes="Bold"
+                                                        TextColor="White" />
+                                                <Label Text="{Binding ActivityLevel}"
+                                                          FontSize="12"
+                                                       TextColor="#B0B0B0" />
                                             </VerticalStackLayout>
 
-                                            <Label 
-                                                Grid.Column="2"
-                                                Text="{Binding KpIndex, StringFormat='Kp {0:F1}'}"
-                                                FontSize="16"
-                                                FontAttributes="Bold"
-                                                TextColor="#FFD700"
-                                                VerticalOptions="Center"
-                                                HorizontalOptions="End" />
+                                            <!-- Probability % -->
+                                            <Label Grid.Column="2"
+                                                   FontSize="20"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#00FF7F"
+                                                   VerticalOptions="Center"
+                                                   HorizontalOptions="End">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding Probability}" />
+                                                        <Span Text="%" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+
                                         </Grid>
                                     </Frame>
                                 </DataTemplate>
