@@ -5,18 +5,17 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="AuroraForecast.Views.MainPage"
              BackgroundColor="#050810"
-             Shell.NavBarIsVisible="False">
-    
+             Shell.NavBarIsVisible="False">    
     <ContentPage.BindingContext>
         <viewmodel:MainPageViewModel />
     </ContentPage.BindingContext>
 
     <Grid>
+        <!--background gif-->
         <Image Source="giphy.gif" 
                Aspect="AspectFill"
                Opacity="0.5"
                IsAnimationPlaying="True" />
-
         <BoxView>
             <BoxView.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -26,7 +25,8 @@
                 </LinearGradientBrush>
             </BoxView.Background>
         </BoxView>
-
+        
+        <!--MAIN CONTENT-->
         <ScrollView VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="30,25,30,20" Spacing="40">
                 
@@ -37,6 +37,7 @@
                            CharacterSpacing="6"
                            FontSize="20" 
                            TextColor="#2DCCAA" 
+                           HorizontalTextAlignment="Center"
                            HorizontalOptions="Center" 
                            FontFamily="MontserratBold"/>
                 </VerticalStackLayout>
@@ -69,7 +70,9 @@
                 </Grid>
                 
                 <!--CIRCLE WITH RESULT-->
-                <Grid HeightRequest="300" WidthRequest="300" HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}">
+                <Grid HeightRequest="300" WidthRequest="300" 
+                      HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}"
+                      Margin="0,0,0,-30">
                     <Path Stroke="#20FFFFFF" 
                          StrokeThickness="12" 
                            StrokeLineCap="Round">
@@ -102,7 +105,7 @@
 
                     <VerticalStackLayout VerticalOptions="Center" 
                                          HorizontalOptions="Center" 
-                                         Margin="-10,5,0,0">
+                                         Margin="-10,5,0,-30">
                         <Label Text="PROBABILITY" 
                                FontSize="15" TextColor="#70FFFFFF" 
                                HorizontalOptions="Center" 
@@ -116,7 +119,7 @@
                             </Label.Shadow>
                         </Label>
                         <Label Text="{Binding ActivityLevel}" 
-                               FontSize="35" 
+                               FontSize="30" 
                                HorizontalOptions="Center" 
                                TextColor="#2DCCAA" 
                                FontAttributes="Bold"
@@ -124,40 +127,37 @@
                         <Label Text="KP INDEX: " 
                                FontSize="15" 
                                HorizontalOptions="Center" 
-                               TextColor="#2DCCAA"
+                               TextColor="Gray"
                                Margin="0,5,0,0"/>
                         <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}" 
                                FontSize="15" 
                                HorizontalOptions="Center" 
-                               TextColor="Gray"/>
+                               TextColor="#2DCCAA"/>
                     </VerticalStackLayout>
                 </Grid>
                 
                 <!--MORE INFO FROM RESULT-->
-                <Grid ColumnDefinitions="*,*" 
-                      ColumnSpacing="20" 
-                      IsVisible="{Binding IsDataLoaded}">
-                    <Border StrokeShape="RoundRectangle 25" 
-                            BackgroundColor="#0AFFFFFF" 
-                            Padding="20" Stroke="Transparent">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="CHANCE" 
-                                   FontSize="11" 
-                                   TextColor="#60FFFFFF" 
-                                   HorizontalOptions="Center" FontFamily="Montserrat"/>
-                            <Label Text="{Binding Probability, StringFormat='{0}%'}" FontSize="32" TextColor="White" FontFamily="MontserratBold" HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                    </Border>
+                <Border StrokeShape="RoundRectangle 25" 
+                        BackgroundColor="#0AFFFFFF" 
+                        Padding="25,20" 
+                        Stroke="Transparent">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="MORE" 
+                               FontSize="12" 
+                               TextColor="#60FFFFFF" 
+                               HorizontalOptions="Center" 
+                               CharacterSpacing="3" 
+                               FontFamily="Montserrat"/>
 
-                    <Border Grid.Column="1" 
-                            StrokeShape="RoundRectangle 25" 
-                            BackgroundColor="#0AFFFFFF" Padding="20" Stroke="Transparent">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="LOCATION" FontSize="11" TextColor="#60FFFFFF" HorizontalOptions="Center" FontFamily="Montserrat"/>
-                            <Label Text="{Binding CityName}" FontSize="18" TextColor="White" FontFamily="MontserratBold" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
-                        </VerticalStackLayout>
-                    </Border>
-                </Grid>
+                        <Label Text="{Binding ActivityDescription}" 
+                                       FontSize="15" 
+                                       TextColor="White" 
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap" 
+                                       FontFamily="Montserrat"
+                                       LineHeight="1.2"/>
+                    </VerticalStackLayout>
+                </Border>
                 
                 <!--3 DAY PROGNOSIS-->
                 <VerticalStackLayout Spacing="20" IsVisible="{Binding IsDataLoaded}">
@@ -186,7 +186,10 @@
                 </VerticalStackLayout>
                 
                 <!--PROPPS TO NOAA-->
-                <Label Text="SOURCE: NOAA SPACE WEATHER" FontSize="10" TextColor="#20FFFFFF" HorizontalOptions="Center" FontFamily="Montserrat" Margin="0,20"/>
+                <Label Text="SOURCE: NOAA SPACE WEATHER" 
+                       FontSize="10" TextColor="#20FFFFFF" FontFamily="Montserrat"
+                       HorizontalOptions="Center" 
+                       Margin="0,20"/>
 
             </VerticalStackLayout>
         </ScrollView>

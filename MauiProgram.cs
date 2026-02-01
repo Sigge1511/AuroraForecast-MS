@@ -24,7 +24,6 @@ public static class MauiProgram
         // Register Services
         builder.Services.AddSingleton<AuroraService>();
         builder.Services.AddSingleton<GeocodingService>();
-        builder.Services.AddSingleton<VideoService>();
 
         // Register ViewModels
         builder.Services.AddTransient<MainPageViewModel>();

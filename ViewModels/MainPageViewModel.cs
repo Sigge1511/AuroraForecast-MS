@@ -12,7 +12,6 @@ public partial class MainPageViewModel : BaseViewModel
 {
     private readonly AuroraService _auroraService;
     private readonly GeocodingService _geocodingService;
-    private readonly VideoService _videoService;
     private readonly ProbabilityDisplayHelper _helper;
 
     [ObservableProperty] private string cityName = string.Empty;
@@ -36,7 +35,6 @@ public partial class MainPageViewModel : BaseViewModel
     {
         _auroraService = new AuroraService();
         _geocodingService = new GeocodingService();
-        _videoService = new VideoService();
         _helper = new ProbabilityDisplayHelper();
 
         Title = "Aurora Forecast";
@@ -110,12 +108,11 @@ public partial class MainPageViewModel : BaseViewModel
 
         CurrentKpIndex = forecast.KpIndex;
         ActivityLevel = forecast.ActivityLevel;
-        ActivityDescription = forecast.GetActivityDescription();
-
         Probability = _helper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude);
-        StrokeDashValues = _helper.UpdateCircle(Probability);
+        ActivityDescription = forecast.GetActivityDescription(Probability); //FOR THE DESCRIPTION BELOW
 
-        //CurrentVideoSource = _videoService.GetVideoSourceUri(CurrentKpIndex);
+        StrokeDashValues = _helper.UpdateCircle(Probability); //FILLS THE CIRCLE IN %
+
     }
 
     private async Task UpdateForecastAsync(double latitude)

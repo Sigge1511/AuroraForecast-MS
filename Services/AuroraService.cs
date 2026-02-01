@@ -119,7 +119,7 @@ public class AuroraService
 
             System.Diagnostics.Debug.WriteLine($"=== Day1: {day1Values.Count} values, Day2: {day2Values.Count}, Day3: {day3Values.Count} ===");
 
-            // Bygg forecast med sannolikhet per dag
+            // forecasts
             var forecasts = new ObservableCollection<ForecastDay>();
 
             if (day1Values.Any())
@@ -214,10 +214,9 @@ public class AuroraService
     {
         return kp switch
         {
-            >= 7 => "⚡",
-            >= 5 => "✨",
-            >= 3 => "🌟",
-            _ => "🌙"
+            >= 5 => "\U0001F7E2", // Green for high (codes for colored circle emojis)
+            >= 3 => "\U0001F7E1", //yellow for medium
+            _ => "\U0001F534"  // red for high
         };
     }
 
