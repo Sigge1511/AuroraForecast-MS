@@ -39,4 +39,12 @@ public class ProbabilityDisplayHelper /*: IValueConverter*/
         double probability = (kp - kpThreshold) * 33.0;
         return Math.Clamp(probability, 0, 100);
     }
+    public DoubleCollection UpdateCircle(double prob)
+    {
+        double totalUnits = 816.0 / 12.0;
+        double filledUnits = (prob / 100.0) * totalUnits;
+
+        var StrokeDashValues = new DoubleCollection { filledUnits, 100 };
+        return StrokeDashValues;
+    }
 }
