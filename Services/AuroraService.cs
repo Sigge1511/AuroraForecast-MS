@@ -134,7 +134,7 @@ public class AuroraService
                     KpIndex = Math.Round(avgKp, 1),
                     Probability = prob,
                     ActivityLevel = GetActivityLevel(avgKp),
-                    IconEmoji = GetIconEmoji(avgKp)
+                    IconEmoji = GetIconEmoji(prob)
                 });
             }
 
@@ -150,7 +150,7 @@ public class AuroraService
                     KpIndex = Math.Round(avgKp, 1),
                     Probability = prob,
                     ActivityLevel = GetActivityLevel(avgKp),
-                    IconEmoji = GetIconEmoji(avgKp)
+                    IconEmoji = GetIconEmoji(prob)
                 });
             }
 
@@ -166,7 +166,7 @@ public class AuroraService
                     KpIndex = Math.Round(avgKp, 1),
                     Probability = prob,
                     ActivityLevel = GetActivityLevel(avgKp),
-                    IconEmoji = GetIconEmoji(avgKp)
+                    IconEmoji = GetIconEmoji(prob)
                 });
             }
 
@@ -193,7 +193,7 @@ public class AuroraService
                 KpIndex = 0,
                 Probability = 0,
                 ActivityLevel = "Low",
-                IconEmoji = "🌙"
+                IconEmoji = "\U0001F7E7"
             });
         }
         return forecasts;
@@ -210,13 +210,14 @@ public class AuroraService
         };
     }
 
-    private static string GetIconEmoji(double kp)
+    public static string GetIconEmoji(double prob)
     {
-        return kp switch
+        return prob switch
         {
-            >= 5 => "\U0001F7E2", // Green for high (codes for colored circle emojis)
-            >= 3 => "\U0001F7E1", //yellow for medium
-            _ => "\U0001F534"  // red for high
+            >= 85 => "\U0001F7E2", // Green for high (codes for colored circle emojis)
+            >= 50 => "\U0001F7E1", //yellow for medium
+            >= 20 => "\U0001F7E0", // orange for small
+            _ => "\U0001F534"  // red for low
         };
     }
 

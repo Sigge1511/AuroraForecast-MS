@@ -7,16 +7,18 @@ public class ProbabilityDisplayHelper
     public double CalculateAuroraProbability(double kp, double userLatitude)
     {
         // calc that likens often used probability calcs
-        double kpThreshold = 10.0 - (userLatitude - 45.0) * 0.4;
-        kpThreshold = Math.Max(0, kpThreshold);
+        double requiredKp = (67 - userLatitude) / 1.5;
+        if (requiredKp < 0) requiredKp = 0;
 
-        if (kp < kpThreshold)
-        {
-            return (kpThreshold - kp < 0.5) ? 5.0 : 0.0;
-        }
+        double diff = kp - requiredKp;
 
-        double probability = (kp - kpThreshold) * 33.0;
-        return Math.Clamp(probability, 0, 100);
+        // a more forgiving estimation on what KP is needed
+        if (diff >= 1) return 95;      
+        if (diff >= 0) return 70 + (diff * 25); 
+        if (diff >= -1) return 30 + (diff + 1) * 40; 
+        if (diff >= -2) return 5 + (diff + 2) * 25; 
+
+        return 0; // to far south for current Kp
     }
     public DoubleCollection UpdateCircle(double prob)
     {
@@ -26,5 +28,15 @@ public class ProbabilityDisplayHelper
         var StrokeDashValues = new DoubleCollection { filledUnits, 100 };
         return StrokeDashValues;
     }
-    
+    public string GetActivityLevelText(double probability)
+    {
+        return probability switch
+        {
+            >= 90 => "EXTREME",
+            >= 70 => "VERY HIGH",  
+            >= 45 => "MODERATE",  
+            >= 20 => "LOW",      
+            _ => "VERY LOW"    
+        };
+    }
 }

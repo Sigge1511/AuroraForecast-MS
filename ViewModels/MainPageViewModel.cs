@@ -107,8 +107,8 @@ public partial class MainPageViewModel : BaseViewModel
             location.CityName, location.Latitude, location.Longitude);
 
         CurrentKpIndex = forecast.KpIndex;
-        ActivityLevel = forecast.ActivityLevel;
         Probability = _helper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude);
+        ActivityLevel = _helper.GetActivityLevelText(Probability);
         ActivityDescription = forecast.GetActivityDescription(Probability); //FOR THE DESCRIPTION BELOW
 
         StrokeDashValues = _helper.UpdateCircle(Probability); //FILLS THE CIRCLE IN %
@@ -122,7 +122,13 @@ public partial class MainPageViewModel : BaseViewModel
         ThreeDayForecast.Clear();
         foreach (var day in forecastDays)
         {
-            // You can also calculate probability per forecast day here if needed
+            // 1. Räkna ut sannolikhet för denna specifika dag
+            day.Probability = _helper.CalculateAuroraProbability(day.KpIndex, latitude);
+
+            // 2. Sätt emojin baserat på den nyss uträknade sannolikheten
+            // (Använd din nya metod som går på Probability!)
+            day.IconEmoji = AuroraService.GetIconEmoji(day.Probability);
+
             ThreeDayForecast.Add(day);
         }
     }

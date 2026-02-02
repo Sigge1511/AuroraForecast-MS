@@ -105,7 +105,7 @@
 
                     <VerticalStackLayout VerticalOptions="Center" 
                                          HorizontalOptions="Center" 
-                                         Margin="-10,5,0,-30">
+                                         Margin="-10,3,0,0">
                         <Label Text="PROBABILITY" 
                                FontSize="15" TextColor="#70FFFFFF" 
                                HorizontalOptions="Center" 
@@ -122,7 +122,6 @@
                                FontSize="30" 
                                HorizontalOptions="Center" 
                                TextColor="#2DCCAA" 
-                               FontAttributes="Bold"
                                Margin="0,-20,0,0"/>
                         <Label Text="KP INDEX: " 
                                FontSize="15" 
@@ -170,10 +169,12 @@
                                     <Label Text="{Binding IconEmoji}" FontSize="28" VerticalOptions="Center" />
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0">
                                         <Label Text="{Binding Date}" TextColor="White" FontFamily="MontserratBold" FontSize="16" />
-                                        <Label Text="{Binding ActivityLevel}" FontSize="12" TextColor="#60FFFFFF" FontFamily="Montserrat" />
+                                        <Label Text="{Binding KpIndex, StringFormat='KP INDEX: {0:F1}'}" 
+                                               FontSize="16" TextColor="#2DCCAA" 
+                                               FontFamily="Montserrat" Opacity="0.7"/>
                                     </VerticalStackLayout>
                                     <Label Grid.Column="2" 
-                                           Text="{Binding Probability, StringFormat='{0}%'}" 
+                                           Text="{Binding Probability, StringFormat='{0:F0}%'}"
                                            TextColor="#2DCCAA" 
                                            FontSize="20" 
                                            FontFamily="MontserratBold" 
