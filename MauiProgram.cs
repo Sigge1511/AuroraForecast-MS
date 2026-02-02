@@ -16,15 +16,14 @@ public static class MauiProgram
             .UseMauiCommunityToolkit()
             .UseMauiCommunityToolkitMediaElement()
             .ConfigureFonts(fonts =>
-            {
-                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            { 
+                fonts.AddFont("Montserrat-Regular.ttf", "Montserrat"); 
+                fonts.AddFont("Montserrat-Bold.ttf", "MontserratBold"); 
             });
 
         // Register Services
         builder.Services.AddSingleton<AuroraService>();
         builder.Services.AddSingleton<GeocodingService>();
-        builder.Services.AddSingleton<VideoService>();
 
         // Register ViewModels
         builder.Services.AddTransient<MainPageViewModel>();

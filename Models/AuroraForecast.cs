@@ -10,15 +10,15 @@ public class AuroraForecast
     public int Probability { get; set; } // 0-100%
     public string ActivityLevel { get; set; } = string.Empty;
     
-    public string GetActivityDescription()
+    public string GetActivityDescription(double probability)
     {
-        return ActivityLevel switch
+        return probability switch
         {
-            "Low" => "Låg aktivitet - Svag chans att se norrsken",
-            "Medium" => "Måttlig aktivitet - God chans vid mörk himmel",
-            "Active" => "Hög aktivitet - Mycket goda chanser!",
-            "Storm" => "Storm! - Utmärkta chanser även på lägre breddgrader",
-            _ => "Okänd aktivitet"
+            <= 10 => "Quiet skies. Very low chance of aurora activity right now. Perfect time for some sleep.",
+            <= 30 => "Low activity. You might see a faint glow on the horizon with a camera, but it's hard for the naked eye.",
+            <= 50 => "Unsettled. Aurora might be visible in dark areas away from city lights. Keep a lookout!",
+            <= 75 => "High chance! Active aurora likely. Find a dark spot, look north, and let your eyes adjust.",
+            _ => "Strong activity! Major aurora possible even with light pollution. Look up and enjoy the show!"
         };
     }
 }

@@ -2,238 +2,203 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:AuroraForecast.ViewModels"
-             xmlns:model="clr-namespace:AuroraForecast.Models"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="AuroraForecast.Views.MainPage"
-             Title="{Binding Title}">
-
+             BackgroundColor="#050810"
+             Shell.NavBarIsVisible="False">    
     <ContentPage.BindingContext>
         <viewmodel:MainPageViewModel />
     </ContentPage.BindingContext>
 
     <Grid>
-        <!-- Video Background -->
-        <!--<toolkit:MediaElement
-            x:Name="BackgroundVideo"
-            Source="{Binding CurrentVideoSource}"
-            ShouldAutoPlay="True"
-            ShouldLoopPlayback="True"
-            ShouldShowPlaybackControls="False"
-            Aspect="AspectFill"
-            Volume="0"
-            VerticalOptions="FillAndExpand"
-            HorizontalOptions="FillAndExpand" />-->
-
-        <!-- Semi-transparent overlay -->
-        <BoxView Color="Black" Opacity="0.4" />
-
-        <!-- Main Content -->
-        <ScrollView>
-            <VerticalStackLayout Padding="20" Spacing="20">
+        <!--background gif-->
+        <Image Source="giphy.gif" 
+               Aspect="AspectFill"
+               Opacity="0.5"
+               IsAnimationPlaying="True" />
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#E6050810" Offset="0.0" />
+                    <GradientStop Color="Transparent" Offset="0.4" />
+                    <GradientStop Color="#FF050810" Offset="0.9" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
+        
+        <!--MAIN CONTENT-->
+        <ScrollView VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="30,25,30,20" Spacing="40">
                 
-                <!-- Header -->
-                <Label 
-                    Text="🌌 Aurora Forecast"
-                    FontSize="32"
-                    FontAttributes="Bold"
-                    TextColor="White"
-                    HorizontalOptions="Center"
-                    Margin="0,20,0,0" />
-
-                <!-- Search Section -->
-                <Frame BackgroundColor="#40FFFFFF" 
-                       CornerRadius="15"
-                       Padding="15"
-                       HasShadow="True">
-                    <VerticalStackLayout Spacing="10">
-                        <Label 
-                            Text="Sök efter stad"
-                            FontSize="16"
-                            TextColor="White"
-                            FontAttributes="Bold" />
-                        
-                        <HorizontalStackLayout Spacing="10">
-                            <Entry 
-                                x:Name="CityEntry"
-                                Text="{Binding CityName}"
-                                Placeholder="T.ex. Uppsala, Kiruna..."
-                                PlaceholderColor="#CCFFFFFF"
-                                TextColor="White"
-                                BackgroundColor="#60000000"
-                                HorizontalOptions="FillAndExpand"
-                                Completed="OnSearchClicked" />
-                            
-                            <Button 
-                                Text="🔍"
-                                Command="{Binding SearchCityCommand}"
-                                BackgroundColor="#8A2BE2"
-                                TextColor="White"
-                                WidthRequest="60"
-                                HeightRequest="50"
-                                CornerRadius="10" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <!-- Error Message -->
-                <Frame 
-                    IsVisible="{Binding HasError}"
-                    BackgroundColor="#80FF4444"
-                    CornerRadius="10"
-                    Padding="15">
-                    <Label 
-                        Text="{Binding ErrorMessage}"
-                        TextColor="White"
-                        FontSize="14" />
-                </Frame>
-
-                <!-- Loading Indicator -->
-                <ActivityIndicator 
-                    IsRunning="{Binding IsBusy}"
-                    IsVisible="{Binding IsBusy}"
-                    Color="White"
-                    HeightRequest="50" />
-
-                <!-- Current Forecast -->
-                <Frame 
-                    IsVisible="{Binding IsDataLoaded}"
-                    BackgroundColor="#60FFFFFF"
-                    CornerRadius="20"
-                    Padding="20"
-                    HasShadow="True">
-                    <VerticalStackLayout Spacing="15">
-                        
-                        <Label 
-                            Text="📍 Aktuell Prognos"
-                            FontSize="20"
-                            FontAttributes="Bold"
-                            TextColor="White" />
-                        
-                        <Label 
-                            Text="{Binding LocationInfo}"
+                <!--TOP LABEL-->
+                <VerticalStackLayout Spacing="5" 
+                                     HorizontalOptions="Center">
+                    <Label Text="AURORA FORECAST" 
+                           CharacterSpacing="6"
+                           FontSize="20" 
+                           TextColor="#2DCCAA" 
+                           HorizontalTextAlignment="Center"
+                           HorizontalOptions="Center" 
+                           FontFamily="MontserratBold"/>
+                </VerticalStackLayout>
+                
+                <!--SEARCH CITY HERE--> 
+                <Grid ColumnDefinitions="*, Auto" Margin="10,0">
+                    <Border Stroke="#40FFFFFF"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8">
+                        <Entry x:Name="CityEntry"
+                               Text="{Binding CityName}"
+                               Placeholder="Search location..."
+                               PlaceholderColor="#50FFFFFF"
+                               TextColor="White"
+                               FontFamily="Montserrat"
+                               FontSize="18"
+                               BackgroundColor="Transparent"
+                               Completed="OnSearchClicked" >                        
+                        </Entry>
+                    </Border>                    
+                    <Button Grid.Column="1"
+                            Text="GO"
+                            Margin="10,0,0,0"
+                            Command="{Binding SearchCityCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="#2DCCAA"
+                            FontFamily="MontserratBold"
                             FontSize="14"
-                            TextColor="#E0E0E0" />
+                            Padding="15,0" />                    
+                </Grid>
+                
+                <!--CIRCLE WITH RESULT-->
+                <Grid HeightRequest="300" WidthRequest="300" 
+                      HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}"
+                      Margin="0,0,0,-30">
+                    <Path Stroke="#20FFFFFF" 
+                         StrokeThickness="12" 
+                           StrokeLineCap="Round">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure StartPoint="140,10">
+                                    <ArcSegment Point="139.9,10" 
+                                Size="130,130" 
+                                IsLargeArc="True" 
+                                SweepDirection="Clockwise" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+                    <Path Stroke="#2DCCAA" 
+                            StrokeThickness="12" 
+                           StrokeLineCap="Round"
+                            StrokeDashArray="{Binding StrokeDashValues}">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure StartPoint="140,10">
+                                    <ArcSegment Point="139.9,10" 
+                                Size="130,130" 
+                                IsLargeArc="True" 
+                                SweepDirection="Clockwise" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
 
-                        <BoxView Color="White" Opacity="0.3" HeightRequest="1" />
-
-                        <!-- Kp Index Display -->
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10">
-                            <VerticalStackLayout Grid.Column="0" Spacing="5">
-                                <Label 
-                                    Text="Kp-Index"
-                                    FontSize="14"
-                                    TextColor="#E0E0E0" />
-                                <Label 
-                                    Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}"
-                                    FontSize="36"
-                                    FontAttributes="Bold"
-                                    TextColor="#FFD700" />
-                            </VerticalStackLayout>
-
-                            <VerticalStackLayout Grid.Column="1" Spacing="5">
-                                <Label 
-                                    Text="Sannolikhet"
-                                    FontSize="14"
-                                    TextColor="#E0E0E0" />
-                                <Label 
-                                    Text="{Binding Probability, StringFormat='{0}%'}"
-                                    FontSize="36"
-                                    FontAttributes="Bold"
-                                    TextColor="#00FF7F" />
-                            </VerticalStackLayout>
-                        </Grid>
-
-                        <Frame 
-                            BackgroundColor="#40000000"
-                            CornerRadius="10"
-                            Padding="15"
-                            Margin="0,10,0,0">
-                            <VerticalStackLayout Spacing="8">
-                                <Label 
-                                    Text="{Binding ActivityLevel}"
-                                    FontSize="18"
-                                    FontAttributes="Bold"
-                                    TextColor="White"
-                                    HorizontalOptions="Center" />
-                                <Label 
-                                    Text="{Binding ActivityDescription}"
-                                    FontSize="14"
-                                    TextColor="#E0E0E0"
-                                    HorizontalOptions="Center"
-                                    HorizontalTextAlignment="Center" />
-                            </VerticalStackLayout>
-                        </Frame>
+                    <VerticalStackLayout VerticalOptions="Center" 
+                                         HorizontalOptions="Center" 
+                                         Margin="-10,3,0,0">
+                        <Label Text="PROBABILITY" 
+                               FontSize="15" TextColor="#70FFFFFF" 
+                               HorizontalOptions="Center" 
+                               CharacterSpacing="4" FontFamily="Montserrat"/>
+                        <Label Text="{Binding Probability, StringFormat='{0:F0}%'}" 
+                               FontSize="90" TextColor="White" 
+                               FontFamily="MontserratBold" 
+                               HorizontalOptions="Center">
+                            <Label.Shadow>
+                                <Shadow Brush="#2DCCAA" Offset="0,0" Radius="30" Opacity="0.6" />
+                            </Label.Shadow>
+                        </Label>
+                        <Label Text="{Binding ActivityLevel}" 
+                               FontSize="30" 
+                               HorizontalOptions="Center" 
+                               TextColor="#2DCCAA" 
+                               Margin="0,-20,0,0"/>
+                        <Label Text="KP INDEX: " 
+                               FontSize="15" 
+                               HorizontalOptions="Center" 
+                               TextColor="Gray"
+                               Margin="0,5,0,0"/>
+                        <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}" 
+                               FontSize="15" 
+                               HorizontalOptions="Center" 
+                               TextColor="#2DCCAA"/>
                     </VerticalStackLayout>
-                </Frame>
+                </Grid>
+                
+                <!--MORE INFO FROM RESULT-->
+                <Border StrokeShape="RoundRectangle 25" 
+                        BackgroundColor="#0AFFFFFF" 
+                        Padding="25,20" 
+                        Stroke="Transparent">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="MORE" 
+                               FontSize="12" 
+                               TextColor="#60FFFFFF" 
+                               HorizontalOptions="Center" 
+                               CharacterSpacing="3" 
+                               FontFamily="Montserrat"/>
 
-                <!-- 3-Day Forecast -->
-                <Frame 
-                    IsVisible="{Binding IsDataLoaded}"
-                    BackgroundColor="#60FFFFFF"
-                    CornerRadius="20"
-                    Padding="20"
-                    HasShadow="True">
-                    <VerticalStackLayout Spacing="15">
-                        
-                        <Label 
-                            Text="📅 3-Dagars Prognos"
-                            FontSize="20"
-                            FontAttributes="Bold"
-                            TextColor="White" />
-
-                        <CollectionView ItemsSource="{Binding ForecastItems}">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="model:ForecastDay">
-                                    <Frame 
-                                        BackgroundColor="#40000000"
-                                        CornerRadius="10"
-                                        Padding="15"
-                                        Margin="0,5">
-                                        <Grid ColumnDefinitions="50,*,80" ColumnSpacing="10">
-                                            <Label 
-                                                Grid.Column="0"
-                                                Text="{Binding IconEmoji}"
-                                                FontSize="30"
-                                                VerticalOptions="Center" />
-                                            
-                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                                <Label 
-                                                    Text="{Binding Date}"
-                                                    FontSize="16"
-                                                    FontAttributes="Bold"
-                                                    TextColor="White" />
-                                                <Label 
-                                                    Text="{Binding ActivityLevel}"
-                                                    FontSize="12"
-                                                    TextColor="#E0E0E0" />
-                                            </VerticalStackLayout>
-
-                                            <Label 
-                                                Grid.Column="2"
-                                                Text="{Binding KpIndex, StringFormat='Kp {0:F1}'}"
-                                                FontSize="16"
-                                                FontAttributes="Bold"
-                                                TextColor="#FFD700"
-                                                VerticalOptions="Center"
-                                                HorizontalOptions="End" />
-                                        </Grid>
-                                    </Frame>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                        <Label Text="{Binding ActivityDescription}" 
+                                       FontSize="15" 
+                                       TextColor="White" 
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap" 
+                                       FontFamily="Montserrat"
+                                       LineHeight="1.2"/>
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
+                
+                <!--3 DAY PROGNOSIS-->
+                <VerticalStackLayout Spacing="20" IsVisible="{Binding IsDataLoaded}">
+                    <Label Text="3-DAY PROGNOSIS" FontSize="12" CharacterSpacing="3" TextColor="#60FFFFFF" Margin="5,0" FontFamily="MontserratBold"/>
 
-                <!-- Info Footer -->
-                <Label 
-                    Text="Data från NOAA Space Weather Prediction Center"
-                    FontSize="10"
-                    TextColor="#B0B0B0"
-                    HorizontalOptions="Center"
-                    Margin="0,10,0,20" />
+                    <CollectionView ItemsSource="{Binding ThreeDayForecast}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="50, *, Auto" Padding="10,20">
+                                    <Label Text="{Binding IconEmoji}" FontSize="28" VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0">
+                                        <Label Text="{Binding Date}" TextColor="White" FontFamily="MontserratBold" FontSize="16" />
+                                        <Label Text="{Binding KpIndex, StringFormat='KP INDEX: {0:F1}'}" 
+                                               FontSize="16" TextColor="#2DCCAA" 
+                                               FontFamily="Montserrat" Opacity="0.7"/>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2" 
+                                           Text="{Binding Probability, StringFormat='{0:F0}%'}"
+                                           TextColor="#2DCCAA" 
+                                           FontSize="20" 
+                                           FontFamily="MontserratBold" 
+                                           VerticalOptions="Center" />
+                                    <BoxView Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="0.5" Color="#10FFFFFF" VerticalOptions="End" Margin="0,20,0,0" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+                
+                <!--PROPPS TO NOAA-->
+                <Label Text="SOURCE: NOAA SPACE WEATHER" 
+                       FontSize="10" TextColor="#20FFFFFF" FontFamily="Montserrat"
+                       HorizontalOptions="Center" 
+                       Margin="0,20"/>
 
             </VerticalStackLayout>
         </ScrollView>
-    </Grid>
 
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#D9050810">
+            <ActivityIndicator IsRunning="True" Color="#2DCCAA" WidthRequest="50" HeightRequest="50" VerticalOptions="Center" HorizontalOptions="Center" />
+        </Grid>
+    </Grid>
 </ContentPage>
+
+

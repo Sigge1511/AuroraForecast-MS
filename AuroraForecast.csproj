@@ -7,6 +7,7 @@
 		<WindowsPackageType>None</WindowsPackageType>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<PublishAot>false</PublishAot>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<OutputType>Exe</OutputType>
         <RootNamespace>AuroraForecast</RootNamespace>
@@ -35,9 +36,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-       
-        <!-- Raw Assets (Videos) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+      <None Remove="Resources\Images\giphy.gif" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiImage Include="Resources\Images\giphy.gif" />
     </ItemGroup>
 
     <ItemGroup>
