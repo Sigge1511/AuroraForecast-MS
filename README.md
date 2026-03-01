@@ -83,5 +83,4 @@ The background gif moves slowly in the background to add the right feeling and h
 
 [x] Innovation (Dynamic Video logic)
 
-License
-Created for educational purposes. NOAA data is in the public domain.
+For educational purposes. NOAA data is in the public domain.
