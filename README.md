@@ -5,16 +5,15 @@
 This is my first .NET MAUI application and my first project ever developed using an "AI-First" workflow. It is meant to be a cross-platform app that provides real-time aurora forecasts based on the NOAA Space Weather API, with calculations of probability for sightings based on the locations latitude.
 
 ### Technical Stack
-.NET 9.0 ⚡
+.NET 9.0 ⚡(will update to 10)
 
 MAUI (Multi-platform App UI)
 
-MVVM Pattern using CommunityToolkit.Mvvm
+MVVM Pattern
 
 NOAA Space Weather API
 
-CommunityToolkit.Maui.MediaElement for video playback
-
+Gif as mediaelement for the background
 
 ### Project Structure
 
