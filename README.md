@@ -2,7 +2,7 @@
 
 ## AI-First Approach
 
-This is my first .NET MAUI application and my first project ever developed using an "AI-First" workflow. It is a cross-platform app that provides real-time aurora forecasts based on the NOAA Space Weather API, with calculations of probability for sightings based on the locations latitude.
+This is my first .NET MAUI application and my first project ever developed using an "AI-First" workflow. It is meant to be a cross-platform app that provides real-time aurora forecasts based on the NOAA Space Weather API, with calculations of probability for sightings based on the locations latitude.
 
 ### Technical Stack
 .NET 9.0 ⚡
