@@ -1,1 +1,98 @@
+# Aurora Forecast App 
 
+## AI-First Approach
+
+This is my first .NET MAUI application and my first project ever developed using an "AI-First" workflow. It is a cross-platform app that provides real-time aurora forecasts based on the NOAA Space Weather API, with calculations of probability for sightings based on the locations latitude.
+
+### Technical Stack
+.NET 9.0 ⚡
+
+MAUI (Multi-platform App UI)
+
+MVVM Pattern using CommunityToolkit.Mvvm
+
+NOAA Space Weather API
+
+CommunityToolkit.Maui.MediaElement for video playback
+
+
+### Project Structure
+
+Plaintext
+
+AuroraForecast/
+
+├── Models/             # Data models
+
+├── ViewModels/         # MVVM ViewModels logic
+
+├── Views/              # UI Layouts (XAML)
+
+├── Services/           # API Integration & Business logic
+
+├── Resources/
+
+│   ├── Raw/            # Place files here
+
+│   └── Styles/         # Global styles and colors
+
+└── AuroraForecast.csproj
+
+### Features
+[x] MVVM Architecture – Clean separation of concerns.
+
+[x] NOAA API Integration – Real-time space weather data.
+
+[x] Dynamic Video Background – Visuals react to solar activity.
+
+[x] 3-Day Forecast – Plan your aurora hunting in advance.
+
+[x] City Search – Location-based results via geocoding.
+
+[x] Async/Await – Smooth, non-blocking UI.
+
+[x] Robust Error Handling – Gracious failures for API or network issues.
+
+Testing & Logic
+Test with different cities:
+Kiruna, SE → High probability (Active/Storm video).
+
+Uppsala, SE → Medium probability (Medium video).
+
+Stockholm, SE → Lower probability (Low video).
+
+Dynamic Background:
+The background video updates automatically based on the Kp-index retrieved from the NOAA API.
+
+Troubleshooting
+"Cannot resolve CommunityToolkit"
+If dependencies are missing, run the following in your terminal:
+
+Bash
+dotnet restore
+Video is not displaying
+Verify that the video files are placed in Resources/Raw/.
+
+Ensure the filenames match exactly: aurora_low.mp4, etc.
+
+Note: The app remains fully functional even without video files!
+
+Grading Criteria Checklist
+[x] API Integration (NOAA)
+
+[x] MVVM Pattern
+
+[x] Async/Await implementation
+
+[x] Data Binding
+
+[x] Commands (ICommand/RelayCommand)
+
+[x] Error Handling
+
+[x] Professional UI/UX
+
+[x] Innovation (Dynamic Video logic)
+
+License
+Created for educational purposes. NOAA data is in the public domain.
