@@ -53,31 +53,20 @@ AuroraForecast/
 
 [x] Robust Error Handling – Gracious failures for API or network issues.
 
-Testing & Logic
+### Testing & Logic
 Test with different cities:
-Kiruna, SE → High probability (Active/Storm video).
+Kiruna, SE → High probability often
 
-Uppsala, SE → Medium probability (Medium video).
+Uppsala, SE → Medium probability often
 
-Stockholm, SE → Lower probability (Low video).
+Paris, FR → Lower probability often
 
-Dynamic Background:
-The background video updates automatically based on the Kp-index retrieved from the NOAA API.
+Moving Background:
+The background gif moves slowly in the background to add the right feeling and has a slight transparency to be more discret.
 
-Troubleshooting
-"Cannot resolve CommunityToolkit"
-If dependencies are missing, run the following in your terminal:
 
-Bash
-dotnet restore
-Video is not displaying
-Verify that the video files are placed in Resources/Raw/.
+### Grading Criteria Checklist
 
-Ensure the filenames match exactly: aurora_low.mp4, etc.
-
-Note: The app remains fully functional even without video files!
-
-Grading Criteria Checklist
 [x] API Integration (NOAA)
 
 [x] MVVM Pattern
