@@ -11,6 +11,14 @@ The result was okay for the backend but the fronend was honestly hideous so the 
 
 I recently added the weather component to it and updated it to .NET10. The weather aspect was much needed since cloud coverage can completely distroy your chances to see the Aurora Borealis.
 
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/29fcc039-1bd2-4d64-8da4-57e3acbe75e3" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/d0e6f8b6-61e4-4da1-981c-2cca4f8b48b5" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/3dcb6be9-ebf4-401c-b1bb-21c5a1272824"  width="300"/></td>
+  </tr>
+</table>
+
 ## ✨ Features
 
 - 🌍 **Search any city worldwide** - Get aurora predictions for your location
@@ -193,10 +201,6 @@ git clone https://github.com/yourusername/aurora-forecast.git
 ## 🤝 Contributing
 
 Contributions welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
