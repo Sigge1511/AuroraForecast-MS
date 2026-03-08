@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AuroraFix/AuroraForecast.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>

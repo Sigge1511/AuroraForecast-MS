@@ -1,0 +1,229 @@
+﻿using System.Text.Json;
+using AuroraFix.Models;
+
+namespace AuroraFix.Services;
+
+public class WeatherService
+{
+    private static WeatherService? _instance;
+    private static readonly object _lock = new();
+    private readonly HttpClient _httpClient;
+
+    // Open-Metero API, free and no key needed
+    private const string BaseUrl = "https://api.open-meteo.com/v1/forecast";
+
+    private WeatherService()
+    {
+        _httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(30)
+        };
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "AuroraFix-MAUI/1.0");
+    }
+
+    public static WeatherService Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                lock (_lock)
+                {
+                    _instance ??= new WeatherService();
+                }
+            }
+            return _instance;
+        }
+    }
+
+    public async Task<Weather?> GetCurrentWeatherAsync(double latitude, double longitude)
+    {
+        try
+        {
+            // Open-Meteo current weather parametrar
+            var url = $"{BaseUrl}?" +
+                      $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
+                      $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
+                      $"current=temperature_2m,relative_humidity_2m,apparent_temperature," +
+                      $"precipitation,cloud_cover,wind_speed_10m,wind_direction_10m&" +
+                      $"timezone=auto";
+
+            System.Diagnostics.Debug.WriteLine($"=== Weather API Request: {url} ===");
+
+            var response = await _httpClient.GetStringAsync(url);
+            System.Diagnostics.Debug.WriteLine($"=== Weather Response: {response.Substring(0, Math.Min(300, response.Length))}... ===");
+
+            var json = JsonSerializer.Deserialize<JsonElement>(response);
+
+            if (json.TryGetProperty("current", out var current))
+            {
+                var conditions = new Weather
+                {
+                    CloudCoverage = GetDoubleValue(current, "cloud_cover"),
+                    ForecastTime = DateTime.UtcNow,
+                    WeatherDescription = GetWeatherDescription(
+                        GetDoubleValue(current, "cloud_cover")
+                    )
+                };
+
+                System.Diagnostics.Debug.WriteLine($"=== Weather Parsed: {conditions.CloudCoverage}% clouds ===");
+                return conditions;
+            }
+
+            System.Diagnostics.Debug.WriteLine("=== Weather: No 'current' property in response ===");
+            return null;
+        }
+        catch (HttpRequestException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"=== Weather HTTP Error: {ex.Message} ===");
+            return null;
+        }
+        catch (JsonException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"=== Weather JSON Error: {ex.Message} ===");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"=== Weather Unknown Error: {ex.Message} ===");
+            return null;
+        }
+    }
+
+   
+    public async Task<List<Weather>> GetThreeDayForecastAsync(double latitude, double longitude)
+    {
+        try
+        {
+            var url = $"{BaseUrl}?" +
+                      $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
+                      $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
+                      $"daily=cloud_cover_mean,temperature_2m_max,temperature_2m_min," +
+                      $"precipitation_sum,wind_speed_10m_max&" +
+                      $"forecast_days=3&" +
+                      $"timezone=auto";
+
+            var response = await _httpClient.GetStringAsync(url);
+            var json = JsonSerializer.Deserialize<JsonElement>(response);
+
+            var forecasts = new List<Weather>();
+
+            if (json.TryGetProperty("daily", out var daily))
+            {
+                var times = daily.GetProperty("time").EnumerateArray().ToList();
+                var cloudCovers = daily.GetProperty("cloud_cover_mean").EnumerateArray().ToList();
+                
+
+                for (int i = 0; i < Math.Min(3, cloudCovers.Count); i++)
+                {
+                    var cloudCover = cloudCovers[i].GetDouble();
+
+                    forecasts.Add(new Weather
+                    {
+                        ForecastTime = DateTime.Parse(times[i].GetString()!),
+                        CloudCoverage = cloudCover,
+                        WeatherDescription = GetWeatherDescription(cloudCover)
+                    });
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"=== Fetched {forecasts.Count} days of weather forecast ===");
+            return forecasts;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"=== 3-day forecast error: {ex.Message} ===");
+            return new List<Weather>();
+        }
+    }
+
+    /// <summary>
+    /// Hämtar väder för specifik natt-tid (perfekt för norrsken!)
+    /// </summary>
+    /// <param name="latitude">Latitud</param>
+    /// <param name="longitude">Longitud</param>
+    /// <param name="nightHour">Timme på natten (t.ex. 23 för 23:00)</param>
+    /// <returns>Väderförhållanden för den timmen</returns>
+    public async Task<Weather?> GetNightWeatherAsync(double latitude, double longitude, int nightHour = 23)
+    {
+        try
+        {
+            var url = $"{BaseUrl}?" +
+                      $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
+                      $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
+                      $"hourly=temperature_2m,cloud_cover,precipitation&" +
+                      $"forecast_days=1&" +
+                      $"timezone=auto";
+
+            var response = await _httpClient.GetStringAsync(url);
+            var json = JsonSerializer.Deserialize<JsonElement>(response);
+
+            if (json.TryGetProperty("hourly", out var hourly))
+            {
+                var times = hourly.GetProperty("time").EnumerateArray().ToList();
+                var temps = hourly.GetProperty("temperature_2m").EnumerateArray().ToList();
+                var clouds = hourly.GetProperty("cloud_cover").EnumerateArray().ToList();
+                var precip = hourly.GetProperty("precipitation").EnumerateArray().ToList();
+
+                // Hitta index för önskad timme
+                for (int i = 0; i < times.Count; i++)
+                {
+                    var time = DateTime.Parse(times[i].GetString()!);
+                    if (time.Hour == nightHour)
+                    {
+                        return new Weather
+                        {
+                            ForecastTime = time,
+                            CloudCoverage = clouds[i].GetDouble(),
+                            WeatherDescription = GetWeatherDescription(clouds[i].GetDouble())
+                        };
+                    }
+                }
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"=== Night weather error: {ex.Message} ===");
+            return null;
+        }
+    }
+
+    private double GetDoubleValue(JsonElement element, string propertyName)
+    {
+        if (element.TryGetProperty(propertyName, out var prop))
+        {
+            if (prop.ValueKind == System.Text.Json.JsonValueKind.Number)
+                return prop.GetDouble();
+            if (prop.ValueKind == System.Text.Json.JsonValueKind.String)
+                if (double.TryParse(prop.GetString(), out var val))
+                    return val;
+        }
+        return 0;
+    }
+
+    private string GetWeatherDescription(double cloudCover)
+    {
+        return cloudCover switch
+        {
+            < 5 => "Clear skies",
+            < 20 => "Partly cloudy",
+            < 50 => "Mostly cloudy",
+            _ => "Overcast"
+        };        
+    }
+
+    public async Task<bool> IsApiAvailableAsync()
+    {
+        try
+        {
+            var result = await GetCurrentWeatherAsync(59.3293, 18.0686); // Stockholm as test location
+            return result != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
