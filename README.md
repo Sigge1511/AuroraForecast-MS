@@ -4,7 +4,12 @@
 
 Aurora forecast app that combines **Kp-index data** from NOAA with **real-time cloud coverage** from Open-Meteo to show you your **actual chances** of seeing the Northern Lights.
 
-This app was first built as a school assignment where we where to build a simple MAUI application.
+## AI FIRST
+Built with a prompt made to Claude, this app was first built as a school assignment where we where to build a simple MAUI applicationm and I wanted to try an AI first approach for the first time.
+
+The result was okay for the backend but the fronend was honestly hideous so the xaml is built by me with the help of Gemini for guidance and troubleshooting.
+
+I recently added the weather component to it and updated it to .NET10. The weather aspect was much needed since cloud coverage can completely distroy your chances to see the Aurora Borealis.
 
 ## ✨ Features
 
