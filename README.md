@@ -191,12 +191,8 @@ git clone https://github.com/yourusername/aurora-forecast.git
 ```
 
 **Requirements:**
-- .NET 9 SDK
-- Visual Studio 2022 with MAUI workload
-
-## 📸 Screenshots
-
-*Coming soon*
+- .NET 10 SDK
+- Visual Studio 2022 or 2026 with MAUI workload
 
 ## 🤝 Contributing
 
