@@ -13,6 +13,7 @@
 | Name | Role | Charter | Status |
 |------|------|---------|--------|
 | Morgana | Lead Architect | `.squad/agents/morgana/charter.md` | ✅ Active |
+| River | Code Reviewer | `.squad/agents/river/history.md` | ✅ Active |
 | Circe | Product/Delivery Lead | `.squad/agents/circe/charter.md` | ✅ Active |
 | Hecate | Backend Engineer | `.squad/agents/hecate/charter.md` | ✅ Active |
 | Fern | Backend Engineer | `.squad/agents/fern/history.md` | ✅ Active |
