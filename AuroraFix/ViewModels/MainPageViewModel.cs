@@ -144,10 +144,15 @@ public partial class MainPageViewModel : BaseViewModel
         CloudCoverage = cloudCoverage;
         CloudCondition = _helper.GetCloudImpactLabel(cloudCoverage);
 
+        // Time-of-day darkness awareness
+        bool isDark = !(weather?.IsDay ?? false);
+        bool isMidnightSun = IsMidnightSun(weather?.Sunrise, weather?.Sunset, location.Latitude);
+        DateTime? darkFrom = (!isDark && !isMidnightSun) ? weather?.Sunset : null;
+
         // Update aurora UI properties
         var baseProbability = _helper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude, 0);
         ActivityLevel = _helper.GetActivityLevelText(Probability);
-        ActivityDescription = forecast.GetActivityDescription(Probability, CurrentKpIndex, cloudCoverage, baseProbability);
+        ActivityDescription = forecast.GetActivityDescription(Probability, CurrentKpIndex, cloudCoverage, baseProbability, isDark, darkFrom, isMidnightSun);
         StrokeDashValues = _helper.UpdateCircle(Probability);
 
         // Debug logging
@@ -181,10 +186,13 @@ public partial class MainPageViewModel : BaseViewModel
                 day.CloudCoverage = weather.CloudCoverage;
                 day.ActualProbability = (int)actualProbability;
                 day.IconEmoji = AuroraService.GetIconEmoji(actualProbability);
+                day.Sunrise = weather.Sunrise;
+                day.Sunset = weather.Sunset;
+                day.DarknessWindow = GetDarknessWindowText(weather.Sunrise, weather.Sunset, latitude);
 
                 System.Diagnostics.Debug.WriteLine(
                     $"Day {day.ForecastDate:yyyy-MM-dd}: KP={day.KpIndex:F1}, " +
-                    $"Base={baseProbability:F0}%, Clouds={weather.CloudCoverage:F0}%, Actual={actualProbability:F0}%");
+                    $"Base={baseProbability:F0}%, Clouds={weather.CloudCoverage:F0}%, Actual={actualProbability:F0}%, Dark={day.DarknessWindow}");
             }
             else
             {
@@ -206,5 +214,29 @@ public partial class MainPageViewModel : BaseViewModel
     {
         CityName = "Östersund";
         await SearchCityAsync();
+    }
+
+    private static string GetDarknessWindowText(DateTime? sunrise, DateTime? sunset, double latitude)
+    {
+        if (sunrise == null || sunset == null)
+            return Math.Abs(latitude) > 60 ? "Darkness unknown at this latitude" : string.Empty;
+
+        var darkHours = (sunrise.Value - sunset.Value).TotalHours;
+        if (darkHours < 0) darkHours += 24;
+
+        if (darkHours < 2)
+            return "Midnight sun — no darkness";
+
+        return $"Dark {sunset.Value:HH:mm} – {sunrise.Value:HH:mm}";
+    }
+
+    private static bool IsMidnightSun(DateTime? sunrise, DateTime? sunset, double latitude)
+    {
+        if (sunrise == null || sunset == null)
+            return Math.Abs(latitude) > 65;
+
+        var darkHours = (sunrise.Value - sunset.Value).TotalHours;
+        if (darkHours < 0) darkHours += 24;
+        return darkHours < 2;
     }
 }

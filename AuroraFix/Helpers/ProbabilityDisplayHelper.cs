@@ -4,7 +4,7 @@ namespace AuroraFix.Helpers;
 
 public class ProbabilityDisplayHelper 
 {   
-    public double CalculateAuroraProbability(double kp, double userLatitude, double cloudCoverage)
+    public double CalculateAuroraProbability(double kp, double userLatitude, double cloudCoverage = 0)
     {
         // calc that likens often used probability calcs
         double requiredKp = (67 - userLatitude) / 1.5;
@@ -65,10 +65,10 @@ public class ProbabilityDisplayHelper
     {
         return cloudCoverage switch
         {
-            <= 15 => "Clear skies ☀️",
-            <= 40 => "Partly cloudy 🌤️",
-            <= 75 => "Mostly cloudy ☁️",
-            _ => "Overcast 🌫️"
+            <= 15 => "Clear skies",
+            <= 40 => "Partly cloudy",
+            <= 75 => "Mostly cloudy",
+            _ => "Overcast"
         };
     }
 }

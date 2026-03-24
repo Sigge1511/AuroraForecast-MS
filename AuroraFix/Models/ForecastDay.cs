@@ -10,6 +10,9 @@ public class ForecastDay
     public string IconEmoji { get; set; } = string.Empty;
     public double? CloudCoverage { get; set; }
     public int? ActualProbability { get; set; }  // Adjusted probability (base - cloud penalty)
+    public DateTime? Sunrise { get; set; }
+    public DateTime? Sunset { get; set; }
+    public string DarknessWindow { get; set; } = string.Empty;
 
     public string DisplayText => $"{Date}: Kp {KpIndex:F1} ({ActivityLevel})";
 }

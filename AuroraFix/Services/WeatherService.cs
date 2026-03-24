@@ -43,7 +43,8 @@ public class WeatherService
             var url = $"{BaseUrl}?" +
                       $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
                       $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"current=cloud_cover&" +
+                      $"current=cloud_cover,is_day&" +
+                      $"daily=sunrise,sunset&" +
                       $"timezone=auto";
 
             System.Diagnostics.Debug.WriteLine($"=== Weather API Request: {url} ===");
@@ -61,10 +62,25 @@ public class WeatherService
                 {
                     CloudCoverage = cloudCoverage,
                     ForecastTime = DateTime.UtcNow,
+                    IsDay = (int)GetDoubleValue(current, "is_day") == 1,
                     WeatherDescription = GetWeatherDescription(cloudCoverage)
                 };
 
-                System.Diagnostics.Debug.WriteLine($"=== Weather Parsed: {conditions.CloudCoverage}% clouds ===");
+                if (json.TryGetProperty("daily", out var todayDaily))
+                {
+                    if (todayDaily.TryGetProperty("sunrise", out var srArr) && srArr.GetArrayLength() > 0)
+                    {
+                        if (DateTime.TryParse(srArr[0].GetString(), out var sr))
+                            conditions.Sunrise = sr;
+                    }
+                    if (todayDaily.TryGetProperty("sunset", out var ssArr) && ssArr.GetArrayLength() > 0)
+                    {
+                        if (DateTime.TryParse(ssArr[0].GetString(), out var ss))
+                            conditions.Sunset = ss;
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"=== Weather Parsed: {conditions.CloudCoverage}% clouds, IsDay={conditions.IsDay}, Sunrise={conditions.Sunrise:HH:mm}, Sunset={conditions.Sunset:HH:mm} ===");
                 return conditions;
             }
 
@@ -96,7 +112,7 @@ public class WeatherService
             var url = $"{BaseUrl}?" +
                       $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
                       $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"daily=cloud_cover_mean&" +
+                      $"daily=cloud_cover_mean,sunrise,sunset&" +
                       $"forecast_days=4&" +
                       $"timezone=auto";
 
@@ -109,16 +125,30 @@ public class WeatherService
             {
                 var times = daily.GetProperty("time").EnumerateArray().ToList();
                 var cloudCovers = daily.GetProperty("cloud_cover_mean").EnumerateArray().ToList();
+                daily.TryGetProperty("sunrise", out var sunriseArr);
+                daily.TryGetProperty("sunset", out var sunsetArr);
 
                 for (int i = 0; i < Math.Min(4, cloudCovers.Count); i++)
                 {
                     var cloudCover = cloudCovers[i].GetDouble();
 
+                    DateTime? sunrise = null, sunset = null;
+                    if (sunriseArr.ValueKind != System.Text.Json.JsonValueKind.Undefined && i < sunriseArr.GetArrayLength())
+                    {
+                        if (DateTime.TryParse(sunriseArr[i].GetString(), out var sr)) sunrise = sr;
+                    }
+                    if (sunsetArr.ValueKind != System.Text.Json.JsonValueKind.Undefined && i < sunsetArr.GetArrayLength())
+                    {
+                        if (DateTime.TryParse(sunsetArr[i].GetString(), out var ss)) sunset = ss;
+                    }
+
                     forecasts.Add(new Weather
                     {
                         ForecastTime = DateTime.Parse(times[i].GetString()!),
                         CloudCoverage = cloudCover,
-                        WeatherDescription = GetWeatherDescription(cloudCover)
+                        WeatherDescription = GetWeatherDescription(cloudCover),
+                        Sunrise = sunrise,
+                        Sunset = sunset
                     });
                 }
             }

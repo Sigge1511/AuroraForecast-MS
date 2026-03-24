@@ -173,6 +173,15 @@
                                         <Label Text="{Binding KpIndex, StringFormat='KP INDEX: {0:F1}'}" 
                                                FontSize="16" TextColor="#2DCCAA" 
                                                FontFamily="Montserrat" Opacity="0.7"/>
+                                        <Label Text="{Binding DarknessWindow}"
+                                               FontSize="12" TextColor="#60FFFFFF"
+                                               FontFamily="Montserrat">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding DarknessWindow}" Value="">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
                                     </VerticalStackLayout>
                                     <Label Grid.Column="2" 
                                            Text="{Binding Probability, StringFormat='{0:F0}%'}"

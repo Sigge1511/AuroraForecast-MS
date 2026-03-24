@@ -10,8 +10,23 @@ public class AuroraForecast
     public int Probability { get; set; } // 0-100%
     public string ActivityLevel { get; set; } = string.Empty;
     
-    public string GetActivityDescription(double probability, double kpIndex = 0, double cloudCoverage = 0, double baseProbability = -1)
+    public string GetActivityDescription(double probability, double kpIndex = 0, double cloudCoverage = 0, double baseProbability = -1, bool isDark = true, DateTime? darkFrom = null, bool isMidnightSun = false)
     {
+        // Time-of-day check: aurora is only visible in darkness
+        if (!isDark)
+        {
+            if (isMidnightSun)
+                return "No darkness at your location this time of year — the midnight sun rules the sky. Come back in autumn when the nights return!";
+
+            var darkTime = darkFrom.HasValue ? $" around {darkFrom.Value:HH:mm}" : " later tonight";
+            return probability switch
+            {
+                > 50 => $"The aurora is looking active — but it is still daylight at your location. Darkness falls{darkTime}. Set a reminder and check back then!",
+                > 20 => $"Some aurora potential tonight, but it is still daytime at your location. It gets dark{darkTime} — worth keeping an eye out!",
+                _ => $"Currently daytime at your location. Solar activity is low right now, but darkness falls{darkTime} — check back then for the latest forecast."
+            };
+        }
+
         // High solar activity but clouds blocking the view (KP >= 5)
         if (kpIndex >= 5 && cloudCoverage > 75)
             return "Strong aurora activity out there — but the sky is completely overcast tonight. Not your night, but the northern lights will be back. Come back another time!";
