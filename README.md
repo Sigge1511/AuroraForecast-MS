@@ -1,34 +1,61 @@
-# 🌌 Aurora Forecast App
+# 🌌 AuroraFix
 
-> Real-time aurora viewing predictions with intelligent weather integration
+*Real-time aurora forecasts, powered by science and open data*
 
-Aurora forecast app that combines **Kp-index data** from NOAA with **real-time cloud coverage** from Open-Meteo to show you your **actual chances** of seeing the Northern Lights.
-
-## AI FIRST
-Built with a prompt made to Claude, this app was first built as a school assignment where we where to build a simple MAUI applicationm and I wanted to try an AI first approach for the first time.
-
-The result was okay for the backend but the fronend was honestly hideous so the xaml is built by me with the help of Gemini for guidance and troubleshooting.
-
-I recently added the weather component to it and updated it to .NET10. The weather aspect was much needed since cloud coverage can completely distroy your chances to see the Aurora Borealis.
+<p align="left">
+  <img src="https://img.shields.io/badge/.NET-10.0-blue"/>
+  <img src="https://img.shields.io/badge/MAUI-Cross--Platform-brightgreen"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow"/>
+  <img src="https://img.shields.io/badge/Platforms-Windows%20·%20Android%20·%20iOS%20·%20macOS-lightgrey"/>
+</p>
 
 <table>
   <tr>
     <td><img src="https://github.com/user-attachments/assets/29fcc039-1bd2-4d64-8da4-57e3acbe75e3" width="300"/></td>
     <td><img src="https://github.com/user-attachments/assets/d0e6f8b6-61e4-4da1-981c-2cca4f8b48b5" width="300"/></td>
-    <td><img src="https://github.com/user-attachments/assets/3dcb6be9-ebf4-401c-b1bb-21c5a1272824"  width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/3dcb6be9-ebf4-401c-b1bb-21c5a1272824" width="300"/></td>
   </tr>
 </table>
 
 ## ✨ Features
 
-- 🌍 **Search any city worldwide** - Get aurora predictions for your location
-- 📊 **Current Kp-index** - Real-time geomagnetic activity from NOAA
-- ☁️ **Weather integration** - Adjusts probability based on cloud coverage
-- 📅 **3-day forecast** - Plan ahead with combined aurora + weather forecasts
-- 🎯 **Smart probability calculation** - Accounts for latitude AND weather
-- 🎨 **Beautiful UI** - Glassmorphism design with intuitive icons
+- 🌍 Search any city worldwide for aurora forecasts
+- 📊 Real-time Kp-index from NOAA
+- ☁️ Weather integration (Open-Meteo)
+- 📅 3-day combined aurora + weather forecast
+- 🎯 Probability calculation (latitude + weather)
+- 🧮 Animated probability display
+- 🗺️ Nordic city presets (Östersund, Kiruna, Tromsø, Reykjavik, Stockholm, Oslo, Göteborg, Malmö)
+- 🖥️ Cross-platform: Windows, Android, iOS, macOS
 
-## 🧮 How It Works
+## How It Works
+### The Probability Formula
+```
+Actual Viewing Probability = Base Aurora Probability - Cloud Penalty
+```
+- **Base Aurora Probability**: Calculated from current Kp-index and your latitude
+- **Cloud Penalty**: Calculated from real-time cloud coverage
+
+#### Example Scenarios
+**Perfect Conditions**
+```
+Location: Kiruna, Sweden (67.86°N)
+Kp-index: 3.0
+Cloud coverage: 5%
+→ Base probability: 70%
+→ Cloud penalty: 0%
+→ Actual: 70% ⭐
+```
+**High Aurora, Bad Weather**
+```
+Location: Kiruna, Sweden (67.86°N)
+Kp-index: 5.0
+Cloud coverage: 80%
+→ Base probability: 90%
+→ Cloud penalty: -80%
+→ Actual: 10% ☁️☁️
+```
+
 
 ### The Magic Formula
 
@@ -72,7 +99,7 @@ Cloud coverage: 80%
 ```
 *Aurora is likely happening, but you won't see it through the clouds!*
 
-## 🏗️ Architecture
+## Architecture
 
 ### Clean Separation of Concerns
 
@@ -105,7 +132,7 @@ Cloud coverage: 80%
 └──────────────────────────────────────┘
 ```
 
-## 🔄 Data Flow
+## Data Flow
 
 ```mermaid
 flowchart LR
@@ -129,7 +156,7 @@ flowchart LR
 5. Display results with weather context
 6. Fetch 3-day forecasts (aurora + weather combined)
 
-## 🌐 APIs Used
+## APIs Used
 
 | Service | API | Purpose | Cost |
 |---------|-----|---------|------|
@@ -179,11 +206,11 @@ Your latitude affects base probability:
 - ✅ iOS (untested)
 - ✅ macOS (untested)
 
-## 🚀 Getting Started
+## 🛠️ Getting Started
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/aurora-forecast.git
+git clone https://github.com/Sigge1511/AuroraForecast-MS
 
 # Open in Visual Studio 2022 or 2026
 # Select target platform (Windows/Android)
@@ -194,11 +221,12 @@ git clone https://github.com/yourusername/aurora-forecast.git
 - .NET 10 SDK
 - Visual Studio 2022 or 2026 with MAUI workload
 
-## 🤝 Contributing
+## Contributing
+We welcome contributions! The active development branch is `Refactor-and-codereview`. Please submit pull requests against this branch. All improvements, bug fixes, and feature suggestions are appreciated.
 
-Contributions welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please open an issue or submit a pull request.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **NOAA Space Weather Prediction Center** - Aurora data
 - **Open-Meteo** - Weather data
