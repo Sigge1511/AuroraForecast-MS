@@ -13,16 +13,16 @@
 | Name | Role | Charter | Status |
 |------|------|---------|--------|
 | Morgana | Lead Architect | `.squad/agents/morgana/charter.md` | ✅ Active |
-| River | Code Reviewer | `.squad/agents/river/history.md` | ✅ Active |
+| River | Code Reviewer | `.squad/agents/river/charter.md` | ✅ Active |
 | Circe | Product/Delivery Lead | `.squad/agents/circe/charter.md` | ✅ Active |
 | Hecate | Backend Engineer | `.squad/agents/hecate/charter.md` | ✅ Active |
-| Fern | Backend Engineer | `.squad/agents/fern/history.md` | ✅ Active |
+| Fern | Backend Engineer | `.squad/agents/fern/charter.md` | ✅ Active |
 | Selene | Frontend Engineer | `.squad/agents/selene/charter.md` | ✅ Active |
 | Nyx | QA/Test Engineer | `.squad/agents/nyx/charter.md` | ✅ Active |
 | Rowan | DevOps Engineer | `.squad/agents/rowan/charter.md` | ✅ Active |
 | Freya | Technical Writer | `.squad/agents/freya/charter.md` | ✅ Active |
 | Vespera | Security Specialist | `.squad/agents/vespera/charter.md` | ✅ Active |
-| Calista | UX Specialist | `.squad/agents/calista/history.md` | ✅ Active |
+| Calista | UX Specialist | `.squad/agents/calista/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.squad/agents/scribe/charter.md` | 📋 Silent |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 
