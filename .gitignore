@@ -6,20 +6,55 @@
 .vs/
 *.user
 *.suo
+*.rsuser
+*.userosscache
+
+# Rider
+.idea/
 
 # NuGet
 packages/
 *.nupkg
+*.snupkg
+
+# Test results & coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Publish output
+publish/
 
 # OS
 .DS_Store
+._*
 Thumbs.db
+desktop.ini
 
 # JavaScript (tooling only)
 node_modules/
 
-# Android signing artifacts
+# Secrets & environment
+.env
+.env.*
+!.env.example
+
+# Android
 **/*.idsig
+local.properties
+google-services.json
+
+# Android & iOS signing — NEVER commit these
+*.keystore
+*.jks
+*.p12
+*.cer
+*.mobileprovision
+*.provisionprofile
+
+# Merge artifacts
+*.orig
 
 # Squad: ignore runtime state (logs, inbox, sessions)
 .squad/orchestration-log/
