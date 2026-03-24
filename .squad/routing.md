@@ -16,7 +16,8 @@ How to decide who handles what.
 | Documentation and technical writing | Freya | developer docs, API docs, runbooks, release notes |
 | Security architecture and threat modeling (pre-build) | Vespera | secure design guidance, trust boundaries, abuse-case prevention |
 | Security review and hardening verification (post-build) | Vespera | security regression checks, vuln review, remediation guidance |
-| Code review | Morgana | PR review, quality gate, cross-domain sanity checks |
+| Code review and quality gate | River | clean code, efficiency, no duplication, professional comments, no spaghetti |
+| Architecture decisions and PR sign-off | Morgana | system boundaries, trade-offs, design reviews |
 | Async issue work (bugs, tests, small features) | @copilot 🤖 | well-defined isolated tasks matching capability profile |
 | Session logging | Scribe | automatic — never needs routing |
 
