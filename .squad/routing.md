@@ -8,7 +8,7 @@ How to decide who handles what.
 |-----------|----------|----------|
 | Architecture, scope, and technical decisions | Morgana | system boundaries, trade-offs, design reviews |
 | Planning, backlog, and delivery management | Circe | issue triage, sequencing, milestones, acceptance criteria |
-| Backend and data services | Hecate | APIs, auth flow wiring, persistence, integrations |
+| Backend and data services | Hecate + Fern | APIs, auth flow wiring, persistence, integrations |
 | Frontend and UX implementation | Selene | UI components, client state, UX polish |
 | UX design, review, and user experience | Calista | information hierarchy, message tone, edge case UX, accessibility |
 | Testing and quality verification | Nyx | test plans, unit/integration tests, regression checks |
