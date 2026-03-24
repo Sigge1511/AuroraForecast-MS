@@ -15,6 +15,7 @@
 | Morgana | Lead Architect | `.squad/agents/morgana/charter.md` | ✅ Active |
 | Circe | Product/Delivery Lead | `.squad/agents/circe/charter.md` | ✅ Active |
 | Hecate | Backend Engineer | `.squad/agents/hecate/charter.md` | ✅ Active |
+| Fern | Backend Engineer | `.squad/agents/fern/history.md` | ✅ Active |
 | Selene | Frontend Engineer | `.squad/agents/selene/charter.md` | ✅ Active |
 | Nyx | QA/Test Engineer | `.squad/agents/nyx/charter.md` | ✅ Active |
 | Rowan | DevOps Engineer | `.squad/agents/rowan/charter.md` | ✅ Active |
