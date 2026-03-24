@@ -20,6 +20,7 @@
 | Rowan | DevOps Engineer | `.squad/agents/rowan/charter.md` | ✅ Active |
 | Freya | Technical Writer | `.squad/agents/freya/charter.md` | ✅ Active |
 | Vespera | Security Specialist | `.squad/agents/vespera/charter.md` | ✅ Active |
+| Calista | UX Specialist | `.squad/agents/calista/history.md` | ✅ Active |
 | Scribe | Session Logger | `.squad/agents/scribe/charter.md` | 📋 Silent |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 
