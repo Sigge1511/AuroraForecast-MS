@@ -1,0 +1,24 @@
+# Auto detect text files and normalize line endings
+* text=auto eol=lf
+
+# Force these to always use LF
+*.cs text eol=lf
+*.xaml text eol=lf
+*.xml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.csproj text eol=lf
+*.slnx text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.dll binary
+*.exe binary
+*.pdb binary
+*.apk binary
