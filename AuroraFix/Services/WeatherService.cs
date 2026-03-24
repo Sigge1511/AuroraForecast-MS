@@ -12,7 +12,7 @@ public class WeatherService
     // Open-Metero API, free and no key needed
     private const string BaseUrl = "https://api.open-meteo.com/v1/forecast";
 
-    private WeatherService()
+    public WeatherService()
     {
         _httpClient = new HttpClient
         {
@@ -40,12 +40,10 @@ public class WeatherService
     {
         try
         {
-            // Open-Meteo current weather parametrar
             var url = $"{BaseUrl}?" +
                       $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
                       $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"current=temperature_2m,relative_humidity_2m,apparent_temperature," +
-                      $"precipitation,cloud_cover,wind_speed_10m,wind_direction_10m&" +
+                      $"current=cloud_cover&" +
                       $"timezone=auto";
 
             System.Diagnostics.Debug.WriteLine($"=== Weather API Request: {url} ===");
@@ -57,13 +55,13 @@ public class WeatherService
 
             if (json.TryGetProperty("current", out var current))
             {
+                var cloudCoverage = GetDoubleValue(current, "cloud_cover");
+
                 var conditions = new Weather
                 {
-                    CloudCoverage = GetDoubleValue(current, "cloud_cover"),
+                    CloudCoverage = cloudCoverage,
                     ForecastTime = DateTime.UtcNow,
-                    WeatherDescription = GetWeatherDescription(
-                        GetDoubleValue(current, "cloud_cover")
-                    )
+                    WeatherDescription = GetWeatherDescription(cloudCoverage)
                 };
 
                 System.Diagnostics.Debug.WriteLine($"=== Weather Parsed: {conditions.CloudCoverage}% clouds ===");
@@ -90,7 +88,7 @@ public class WeatherService
         }
     }
 
-   
+    // Fetches 3-day cloud coverage forecast
     public async Task<List<Weather>> GetThreeDayForecastAsync(double latitude, double longitude)
     {
         try
@@ -98,9 +96,8 @@ public class WeatherService
             var url = $"{BaseUrl}?" +
                       $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
                       $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"daily=cloud_cover_mean,temperature_2m_max,temperature_2m_min," +
-                      $"precipitation_sum,wind_speed_10m_max&" +
-                      $"forecast_days=3&" +
+                      $"daily=cloud_cover_mean&" +
+                      $"forecast_days=4&" +
                       $"timezone=auto";
 
             var response = await _httpClient.GetStringAsync(url);
@@ -112,9 +109,8 @@ public class WeatherService
             {
                 var times = daily.GetProperty("time").EnumerateArray().ToList();
                 var cloudCovers = daily.GetProperty("cloud_cover_mean").EnumerateArray().ToList();
-                
 
-                for (int i = 0; i < Math.Min(3, cloudCovers.Count); i++)
+                for (int i = 0; i < Math.Min(4, cloudCovers.Count); i++)
                 {
                     var cloudCover = cloudCovers[i].GetDouble();
 
@@ -136,67 +132,24 @@ public class WeatherService
             return new List<Weather>();
         }
     }
-
-    /// <summary>
-    /// Hämtar väder för specifik natt-tid (perfekt för norrsken!)
-    /// </summary>
-    /// <param name="latitude">Latitud</param>
-    /// <param name="longitude">Longitud</param>
-    /// <param name="nightHour">Timme på natten (t.ex. 23 för 23:00)</param>
-    /// <returns>Väderförhållanden för den timmen</returns>
-    public async Task<Weather?> GetNightWeatherAsync(double latitude, double longitude, int nightHour = 23)
+    
+    public static bool IsClearEnoughForAurora(double cloudCoverage)
     {
-        try
-        {
-            var url = $"{BaseUrl}?" +
-                      $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"hourly=temperature_2m,cloud_cover,precipitation&" +
-                      $"forecast_days=1&" +
-                      $"timezone=auto";
+        return cloudCoverage < 30;
+    }
 
-            var response = await _httpClient.GetStringAsync(url);
-            var json = JsonSerializer.Deserialize<JsonElement>(response);
-
-            if (json.TryGetProperty("hourly", out var hourly))
-            {
-                var times = hourly.GetProperty("time").EnumerateArray().ToList();
-                var temps = hourly.GetProperty("temperature_2m").EnumerateArray().ToList();
-                var clouds = hourly.GetProperty("cloud_cover").EnumerateArray().ToList();
-                var precip = hourly.GetProperty("precipitation").EnumerateArray().ToList();
-
-                // Hitta index för önskad timme
-                for (int i = 0; i < times.Count; i++)
-                {
-                    var time = DateTime.Parse(times[i].GetString()!);
-                    if (time.Hour == nightHour)
-                    {
-                        return new Weather
-                        {
-                            ForecastTime = time,
-                            CloudCoverage = clouds[i].GetDouble(),
-                            WeatherDescription = GetWeatherDescription(clouds[i].GetDouble())
-                        };
-                    }
-                }
-            }
-
-            return null;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"=== Night weather error: {ex.Message} ===");
-            return null;
-        }
+    public static bool IsPerfectForAurora(double cloudCoverage)
+    {
+        return cloudCoverage < 5;
     }
 
     private double GetDoubleValue(JsonElement element, string propertyName)
     {
         if (element.TryGetProperty(propertyName, out var prop))
         {
-            if (prop.ValueKind == System.Text.Json.JsonValueKind.Number)
+            if (prop.ValueKind == JsonValueKind.Number)
                 return prop.GetDouble();
-            if (prop.ValueKind == System.Text.Json.JsonValueKind.String)
+            if (prop.ValueKind == JsonValueKind.String)
                 if (double.TryParse(prop.GetString(), out var val))
                     return val;
         }
@@ -211,7 +164,7 @@ public class WeatherService
             < 20 => "Partly cloudy",
             < 50 => "Mostly cloudy",
             _ => "Overcast"
-        };        
+        };
     }
 
     public async Task<bool> IsApiAvailableAsync()
@@ -226,4 +179,17 @@ public class WeatherService
             return false;
         }
     }
+
+
+
+    //public static string GetCloudCondition(double cloudCoverage)
+    //{
+    //    return cloudCoverage switch
+    //    {
+    //        < 5 => "Clear skies - perfect!",
+    //        < 20 => "Partly cloudy - Okay",
+    //        < 50 => "Mostly cloudy - Difficult",
+    //        _ => "Overcast - Impossible"
+    //    };
+    //}
 }

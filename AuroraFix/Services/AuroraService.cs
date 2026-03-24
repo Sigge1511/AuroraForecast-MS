@@ -1,5 +1,6 @@
 using AuroraFix.Models;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text.Json;
 
 namespace AuroraFix.Services;
@@ -126,11 +127,13 @@ public class AuroraService
             {
                 var avgKp = day1Values.Average();
                 var prob = CalculateProbability(avgKp, latitude);
-                System.Diagnostics.Debug.WriteLine($"=== Day 1: Kp={avgKp:F1}, Prob={prob}% ===");
+                var forecastDate = ParseNoaaDate(dateParts[0], dateParts[1]);
+                System.Diagnostics.Debug.WriteLine($"=== Day 1: Kp={avgKp:F1}, Prob={prob}%, Date={forecastDate:yyyy-MM-dd} ===");
 
                 forecasts.Add(new ForecastDay
                 {
                     Date = $"{dateParts[0]} {dateParts[1]}",
+                    ForecastDate = forecastDate,
                     KpIndex = Math.Round(avgKp, 1),
                     Probability = prob,
                     ActivityLevel = GetActivityLevel(avgKp),
@@ -142,11 +145,13 @@ public class AuroraService
             {
                 var avgKp = day2Values.Average();
                 var prob = CalculateProbability(avgKp, latitude);
-                System.Diagnostics.Debug.WriteLine($"=== Day 2: Kp={avgKp:F1}, Prob={prob}% ===");
+                var forecastDate = ParseNoaaDate(dateParts[2], dateParts[3]);
+                System.Diagnostics.Debug.WriteLine($"=== Day 2: Kp={avgKp:F1}, Prob={prob}%, Date={forecastDate:yyyy-MM-dd} ===");
 
                 forecasts.Add(new ForecastDay
                 {
                     Date = $"{dateParts[2]} {dateParts[3]}",
+                    ForecastDate = forecastDate,
                     KpIndex = Math.Round(avgKp, 1),
                     Probability = prob,
                     ActivityLevel = GetActivityLevel(avgKp),
@@ -158,11 +163,13 @@ public class AuroraService
             {
                 var avgKp = day3Values.Average();
                 var prob = CalculateProbability(avgKp, latitude);
-                System.Diagnostics.Debug.WriteLine($"=== Day 3: Kp={avgKp:F1}, Prob={prob}% ===");
+                var forecastDate = ParseNoaaDate(dateParts[4], dateParts[5]);
+                System.Diagnostics.Debug.WriteLine($"=== Day 3: Kp={avgKp:F1}, Prob={prob}%, Date={forecastDate:yyyy-MM-dd} ===");
 
                 forecasts.Add(new ForecastDay
                 {
                     Date = $"{dateParts[4]} {dateParts[5]}",
+                    ForecastDate = forecastDate,
                     KpIndex = Math.Round(avgKp, 1),
                     Probability = prob,
                     ActivityLevel = GetActivityLevel(avgKp),
@@ -187,9 +194,11 @@ public class AuroraService
         var today = DateTime.UtcNow.Date;
         for (int i = 0; i < 3; i++)
         {
+            var date = today.AddDays(i);
             forecasts.Add(new ForecastDay
             {
-                Date = today.AddDays(i).ToString("ddd dd MMM"),
+                Date = date.ToString("ddd dd MMM"),
+                ForecastDate = date,
                 KpIndex = 0,
                 Probability = 0,
                 ActivityLevel = "Low",
@@ -254,5 +263,21 @@ public class AuroraService
         else if (absLat < 45) baseProbability = Math.Max(0, baseProbability - 20);
 
         return baseProbability;
+    }
+
+    // Parses NOAA abbreviated month + day strings (e.g. "Mar" "24") into a UTC DateTime.
+    // Handles year-boundary: if the parsed date is more than 60 days in the past, rolls to the next year.
+    private static DateTime ParseNoaaDate(string month, string day)
+    {
+        var year = DateTime.UtcNow.Year;
+        if (DateTime.TryParseExact($"{month} {day} {year}", "MMM d yyyy",
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
+        {
+            if (result.Date < DateTime.UtcNow.Date.AddDays(-60))
+                result = result.AddYears(1);
+            return result.Date;
+        }
+        // Fallback: should never happen with valid NOAA data
+        return DateTime.UtcNow.Date;
     }
 }

@@ -55,8 +55,9 @@
                                FontFamily="Montserrat"
                                FontSize="18"
                                BackgroundColor="Transparent"
-                               Completed="OnSearchClicked" >                        
-                        </Entry>
+                               IsSpellCheckEnabled="False"
+                               IsTextPredictionEnabled="False"
+                               Completed="OnSearchClicked" />
                     </Border>                    
                     <Button Grid.Column="1"
                             Text="GO"
