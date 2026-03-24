@@ -83,3 +83,25 @@ Reference: https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use
 - All Unicode characters can now be typed into the search field on all Windows systems regardless of system locale.
 - No visual changes, no behavior changes, no API changes.
 - No other platforms affected (manifest is Windows-only).
+
+## Session directives — 2026-03-24
+
+### 2026-03-24T22-47: User directive — Vespera consultation requirement
+**By:** Sigge (via Copilot)
+**What:** Vespera MUST be consulted both before and after building anything new. She may cooperate with Morgana on security architecture and SHALL always collaborate with Freya to ensure security documentation is complete.
+**Why:** User request — security must be baked in from the start AND documented every time.
+
+### 2026-03-24T22-47: User directive — Hecate + Fern parallel work
+**By:** Sigge (via Copilot)
+**What:** Hecate and Fern should always be spawned in parallel when backend work is assigned. No reason to serialize them — they are more efficient working simultaneously.
+**Why:** User request — maximize backend throughput by running both witches at once.
+
+### 2026-03-24T22-47: User directive — River's lockout policy softened
+**By:** Sigge (via Copilot)
+**What:** River should NOT enforce strict author lockouts every time she flags issues. Lockouts are reserved for serious rejections. For minor alterations and small fixes, the original author may address River's feedback directly. River's role is to guide and improve, not to block.
+**Why:** User request — the coven works with love, not bureaucracy.
+
+### 2026-03-24T22-47: User directive — Always address owner as Sigge
+**By:** Sigge (via Copilot)
+**What:** The project owner is always to be called "Sigge". Never "Maja", never any other name. This applies to all agents and the coordinator in every session.
+**Why:** User preference — persistent identity rule.

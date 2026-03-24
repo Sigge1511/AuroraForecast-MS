@@ -30,5 +30,7 @@ How to decide who handles what.
 5. Pair build + test by default (implementation plus Nyx in parallel).
 6. Route planning/management-first work to Circe.
 7. Route final architecture or quality gates through Morgana.
-8. For security-impacting work, involve Vespera before implementation and again before merge.
-9. For documentation deliverables, route Freya and Vespera together for security-accurate docs/runbooks.
+8. **Vespera consultation is MANDATORY — before AND after every new build.** She may pair with Morgana during design; she SHALL always pair with Freya so security is both implemented and documented.
+9. **Hecate and Fern always run in parallel** for backend work — never serialize them.
+10. **River's lockout rule is advisory, not automatic.** Lockouts are reserved for serious rejections where a full rework is needed. For minor alterations and small fixes, the original author may address River's feedback directly. River guides and improves — she does not block the coven unnecessarily.
+11. **Always address the project owner as Sigge** — never Maja or any other name. This applies to all agents and the coordinator in every session.

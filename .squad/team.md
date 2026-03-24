@@ -36,7 +36,7 @@
 
 ## Project Context
 
-- **Owner:** MajaSigfeldt
+- **Owner:** MajaSigfeldt (always address as **Sigge**)
 - **Stack:** C# · .NET MAUI (net10.0) · CommunityToolkit.Mvvm 8.4.0 · Android / iOS / macCatalyst / Windows
 - **Description:** AuroraFix — a northern lights (aurora borealis) forecast mobile/desktop app. Fetches real-time Kp-index from NOAA, 3-day geomagnetic forecast, and cloud coverage from Open-Meteo. Combines Kp + latitude + cloud cover to calculate aurora visibility probability (0–100%). Single-page MVVM app with a dark space theme.
 - **Solution:** AuroraForecast.slnx → AuroraFix/AuroraForecast.csproj
