@@ -41,6 +41,19 @@
 - `ObservableProperty` fields follow CommunityToolkit.Mvvm conventions
 - No raw strings for UI messages — they belong in the model/helper layer, not the ViewModel
 
+## Learnings
+
+### 2026-03-24 — VM & Model Refactor Review (Sigge1511)
+- **Model as behaviour host anti-pattern**: `AuroraForecast.GetActivityDescription()` is the canonical example of logic creeping into a model. 60+ lines, 7 parameters, rich UI copy — all on a data class. Flag this pattern immediately on any future PR.
+- **Service display leakage**: Static label/emoji helpers (`GetActivityLevel`, `GetIconEmoji`) on `AuroraService` are a repeatable pattern to watch — services accumulate display helpers over time if there's no clear home for them. `ProbabilityDisplayHelper` (or a sibling) is the right home.
+- **ViewModel static methods signal misplacement**: Private static methods on a ViewModel with no ViewModel dependencies (`IsMidnightSun`, `GetDarknessWindowText`) are a reliable smell — they belong in Helpers.
+- **Duplicated threshold tables**: When the same numeric thresholds appear in two switch expressions for different outputs (e.g. `AdjustForCloudCoverage` and `GetCloudImpactLabel`), drift is inevitable. Named constants shared between the two methods is the fix.
+- **Sentinel defaults hide nullability**: `double baseProbability = -1` as a "not provided" signal should always be `double? baseProbability = null` in C#. Flag on every review.
+- **Redundant int-cast properties**: `ActualProbability = (int)Probability` set at every assignment site is a sign the property should be computed, not stored.
+- **Naming asymmetry as documentation debt**: `ThreeDayForecast` / `GetFourDayForecastAsync` is explainable but silently confusing — always worth a comment at the call site.
+
+---
+
 ## Known Issues to Watch (AuroraFix)
 - **Duplicate probability formula** — `AuroraService.CalculateProbability()` and `ProbabilityDisplayHelper.CalculateAuroraProbability()` do similar work; ViewModel uses the Helper, the Service uses its own. This is spaghetti — needs consolidation.
 - **WeatherService manual singleton** — bypasses DI; fine for now but flag if the codebase grows

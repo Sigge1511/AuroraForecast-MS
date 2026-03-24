@@ -35,3 +35,20 @@ Targets: Android, iOS, macCatalyst, Windows.
 - No test project
 
 **Default location:** Östersund, Sweden
+
+## Learnings
+
+### 2026-03-22: Helper layer audit
+
+1. **Three-layer presentation leak identified.** Display logic was spread across AuroraForecast model (60-line `GetActivityDescription`), AuroraService (static `GetActivityLevel`/`GetIconEmoji`), and MainPageViewModel (static `GetDarknessWindowText`/`IsMidnightSun`). All pure functions, none belonged where they lived.
+
+2. **Helper taxonomy crystallized.** Two helpers with clear responsibilities:
+   - `ProbabilityDisplayHelper` — calculations + short display labels (probability, Kp classification, emoji, midnight sun bool, cloud adjustment, circle arc)
+   - `GuiMessageHelper` (new) — multi-sentence UI copy-text and formatted display strings (activity description, darkness window text)
+   - The dividing line: if it returns a number, bool, or one-word label → ProbabilityDisplayHelper. If it returns user-facing prose or formatted strings → GuiMessageHelper.
+
+3. **Naming conflict found.** `AuroraService.GetActivityLevel(kp)` and `ProbabilityDisplayHelper.GetActivityLevelText(probability)` do similar things with different inputs. Renaming the Kp-based one to `GetKpActivityLevel` makes the distinction explicit.
+
+4. **AuroraForecast model had behavior.** `GetActivityDescription()` was the only method on the model — 60+ lines of conditional UI text with 7 parameters, none of which were model properties. Classic misplaced logic. After extraction, model becomes a pure data class (7 auto-properties, zero methods).
+
+5. **VM orchestration pattern confirmed.** The ViewModel's `UpdateCurrentAuroraAndWeatherAsync` and `UpdateThreeDayForecastWithWeatherAsync` are legitimate orchestration — they call services, assemble parameters, call helpers, and set observable properties. This is correct MVVM. The only things that needed to move out were the two static pure-function methods.
