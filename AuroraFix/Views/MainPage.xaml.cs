@@ -1,18 +1,42 @@
-﻿namespace AuroraFix.Views;
+namespace AuroraFix.Views;
 
 public partial class MainPage : ContentPage
 {
-    public MainPage()
+    public MainPage(ViewModels.MainPageViewModel viewModel)
     {
         InitializeComponent();
+        BindingContext = viewModel;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is ViewModels.MainPageViewModel vm && !vm.IsDataLoaded)
+        {
+            try
+            {
+                await vm.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MainPage.OnAppearing error: {ex.Message}");
+            }
+        }
     }
 
     private async void OnSearchClicked(object? sender, EventArgs e)
     {
-        var viewModel = BindingContext as ViewModels.MainPageViewModel;
-        if (viewModel?.SearchCityCommand.CanExecute(null) == true)
+        try
         {
-            await viewModel.SearchCityCommand.ExecuteAsync(null);
+            if (BindingContext is ViewModels.MainPageViewModel vm &&
+                vm.SearchCityCommand.CanExecute(null))
+            {
+                await vm.SearchCityCommand.ExecuteAsync(null);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"MainPage.OnSearchClicked error: {ex.Message}");
         }
     }
 }

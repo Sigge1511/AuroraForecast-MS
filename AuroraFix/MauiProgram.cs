@@ -32,6 +32,7 @@ namespace AuroraFix
             // Register Services
             builder.Services.AddSingleton<AuroraService>();
             builder.Services.AddSingleton<GeocodingService>();
+            builder.Services.AddSingleton<WeatherService>();
 
             // Register ViewModels
             builder.Services.AddTransient<MainPageViewModel>();

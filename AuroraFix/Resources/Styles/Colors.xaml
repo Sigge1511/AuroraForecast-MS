@@ -18,4 +18,29 @@
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
 
+    <!-- Aurora design tokens — colours -->
+    <Color x:Key="AuroraTeal">#2DCCAA</Color>
+    <Color x:Key="BackgroundDark">#050810</Color>
+    <Color x:Key="TextMuted">#60FFFFFF</Color>
+    <Color x:Key="TextVeryMuted">#20FFFFFF</Color>
+    <Color x:Key="TextSubtle">#70FFFFFF</Color>
+    <Color x:Key="SearchBorder">#40FFFFFF</Color>
+    <Color x:Key="CardBackground">#0AFFFFFF</Color>
+    <Color x:Key="DividerLine">#10FFFFFF</Color>
+    <Color x:Key="LoadingOverlay">#D9050810</Color>
+
+    <!-- Aurora design tokens — font sizes -->
+    <x:Double x:Key="FontSizeAppTitle">20</x:Double>
+    <x:Double x:Key="FontSizeProbabilityHuge">90</x:Double>
+    <x:Double x:Key="FontSizeActivityLevel">30</x:Double>
+    <x:Double x:Key="FontSizeBody">15</x:Double>
+    <x:Double x:Key="FontSizeBodyLarge">18</x:Double>
+    <x:Double x:Key="FontSizeForecastDay">16</x:Double>
+    <x:Double x:Key="FontSizeForecastProb">20</x:Double>
+    <x:Double x:Key="FontSizeForecastIcon">28</x:Double>
+    <x:Double x:Key="FontSizeDarknessWindow">12</x:Double>
+    <x:Double x:Key="FontSizeLabel">15</x:Double>
+    <x:Double x:Key="FontSizeCaption">12</x:Double>
+    <x:Double x:Key="FontSizeFooter">10</x:Double>
+
 </ResourceDictionary>
