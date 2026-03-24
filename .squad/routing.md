@@ -10,6 +10,7 @@ How to decide who handles what.
 | Planning, backlog, and delivery management | Circe | issue triage, sequencing, milestones, acceptance criteria |
 | Backend and data services | Hecate | APIs, auth flow wiring, persistence, integrations |
 | Frontend and UX implementation | Selene | UI components, client state, UX polish |
+| UX design, review, and user experience | Calista | information hierarchy, message tone, edge case UX, accessibility |
 | Testing and quality verification | Nyx | test plans, unit/integration tests, regression checks |
 | DevOps and platform operations | Rowan | CI/CD, containers, infra config, deployment workflows |
 | Documentation and technical writing | Freya | developer docs, API docs, runbooks, release notes |
