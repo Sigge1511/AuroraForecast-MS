@@ -120,25 +120,9 @@ public class AuroraService
             Latitude = latitude,
             Longitude = longitude,
             Probability = (int)ProbabilityDisplayHelper.CalculateAuroraProbability(kpIndex, latitude),
-            ActivityLevel = GetActivityLevel(kpIndex)
+            ActivityLevel = ProbabilityDisplayHelper.GetKpActivityLevel(kpIndex)
         };
     }
-
-    public static string GetActivityLevel(double kp) => kp switch
-    {
-        >= 7 => "Storm",
-        >= 5 => "Active",
-        >= 3 => "Medium",
-        _ => "Low"
-    };
-
-    public static string GetIconEmoji(double prob) => prob switch
-    {
-        >= 85 => "\U0001F7E2",
-        >= 50 => "\U0001F7E1",
-        >= 20 => "\U0001F7E0",
-        _ => "\U0001F534"
-    };
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
@@ -166,8 +150,8 @@ public class AuroraService
             ForecastDate = ParseNoaaDate(monthPart, dayPart),
             KpIndex = Math.Round(avgKp, 1),
             Probability = prob,
-            ActivityLevel = GetActivityLevel(avgKp),
-            IconEmoji = GetIconEmoji(prob)
+            ActivityLevel = ProbabilityDisplayHelper.GetKpActivityLevel(avgKp),
+            IconEmoji = ProbabilityDisplayHelper.GetIconEmoji(prob)
         });
     }
 
@@ -186,7 +170,7 @@ public class AuroraService
                 KpIndex = 0,
                 Probability = 0,
                 ActivityLevel = "Low",
-                IconEmoji = GetIconEmoji(0)
+                IconEmoji = ProbabilityDisplayHelper.GetIconEmoji(0)
             });
         }
 

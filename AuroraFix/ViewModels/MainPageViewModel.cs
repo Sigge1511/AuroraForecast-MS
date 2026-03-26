@@ -116,10 +116,10 @@ public partial class MainPageViewModel : BaseViewModel
         StrokeDashValues = ProbabilityDisplayHelper.UpdateCircle(Probability);
 
         bool isDark = !(weather?.IsDay ?? false);
-        bool isMidnightSun = IsMidnightSun(weather?.Sunrise, weather?.Sunset, location.Latitude);
+        bool isMidnightSun = GuiMessageHelper.IsMidnightSun(weather?.Sunrise, weather?.Sunset, location.Latitude);
         DateTime? darkFrom = (!isDark && !isMidnightSun) ? weather?.Sunset : null;
 
-        ActivityDescription = forecast.GetActivityDescription(
+        ActivityDescription = GuiMessageHelper.GetActivityDescription(
             Probability, CurrentKpIndex, clouds, baseProbability, isDark, darkFrom, isMidnightSun);
     }
 
@@ -140,45 +140,19 @@ public partial class MainPageViewModel : BaseViewModel
                 day.Probability = ProbabilityDisplayHelper.AdjustForCloudCoverage(baseProbability, weather.CloudCoverage);
                 day.CloudCoverage = weather.CloudCoverage;
                 day.ActualProbability = (int)day.Probability;
-                day.IconEmoji = AuroraService.GetIconEmoji(day.Probability);
+                day.IconEmoji = ProbabilityDisplayHelper.GetIconEmoji(day.Probability);
                 day.Sunrise = weather.Sunrise;
                 day.Sunset = weather.Sunset;
-                day.DarknessWindow = GetDarknessWindowText(weather.Sunrise, weather.Sunset, latitude);
+                day.DarknessWindow = GuiMessageHelper.GetDarknessWindowText(weather.Sunrise, weather.Sunset, latitude);
             }
             else
             {
                 day.Probability = baseProbability;
                 day.ActualProbability = (int)baseProbability;
-                day.IconEmoji = AuroraService.GetIconEmoji(baseProbability);
+                day.IconEmoji = ProbabilityDisplayHelper.GetIconEmoji(baseProbability);
             }
 
             ThreeDayForecast.Add(day);
         }
-    }
-
-    // Formats the darkness window for a forecast card, e.g. "Dark 21:30 - 03:45".
-    // Returns an empty string for mid-latitude locations where darkness is not relevant.
-    private static string GetDarknessWindowText(DateTime? sunrise, DateTime? sunset, double latitude)
-    {
-        if (sunrise == null || sunset == null)
-            return Math.Abs(latitude) > 60 ? "Darkness unknown at this latitude" : string.Empty;
-
-        var darkHours = (sunrise.Value - sunset.Value).TotalHours;
-        if (darkHours < 0) darkHours += 24;
-
-        return darkHours < 2
-            ? "Midnight sun — no darkness"
-            : $"Dark {sunset.Value:HH:mm} – {sunrise.Value:HH:mm}";
-    }
-
-    // Returns true if there is less than 2 hours of darkness — midnight sun scenario.
-    private static bool IsMidnightSun(DateTime? sunrise, DateTime? sunset, double latitude)
-    {
-        if (sunrise == null || sunset == null)
-            return Math.Abs(latitude) > 65;
-
-        var darkHours = (sunrise.Value - sunset.Value).TotalHours;
-        if (darkHours < 0) darkHours += 24;
-        return darkHours < 2;
     }
 }
