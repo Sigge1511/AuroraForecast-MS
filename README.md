@@ -1,4 +1,4 @@
-# 🌌 AuroraFix
+# 🌌 Aurora Forecast
 
 *Chase the Northern Lights with confidence — real-time aurora forecasts powered by live space weather data*
 
@@ -17,11 +17,11 @@
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/d0e6f8b6-61e4-4da1-981c-2cca4f8b48b5" width="300"/><br/>
-      <sub><b>✨ Developer redesign — polished by hand</b></sub>
+      <sub><b>✨ My redesign — polished by hand</b></sub>
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/3dcb6be9-ebf4-401c-b1bb-21c5a1272824" width="300"/><br/>
-      <sub><b>✨ Developer redesign — forecast view</b></sub>
+      <sub><b>✨ My redesign — forecast view</b></sub>
     </td>
   </tr>
 </table>
@@ -30,13 +30,13 @@
 
 ## 🤖 Born from an Experiment
 
-AuroraFix started as a bold experiment: *what happens when you let an AI build an entire app from scratch?*
+Aurora Forecast started as a bold experiment: *what happens when you let an AI build an entire app from scratch?*
 
 The backend — the data pipeline, probability engine, and API integrations — was architected by Claude (Anthropic's AI assistant) as part of a school assignment. The result was surprisingly solid. The logic worked. The math was right. The architecture was clean.
 
 But the UI? That needed a human touch.
 
-The entire frontend was then torn down and rebuilt by the developer — every screen, every animation, every detail crafted to feel as magical as the aurora itself. What started as an AI experiment became a proper app, and it's still growing.
+The entire frontend was then torn down and rebuilt by me — every screen, every animation, every detail crafted to feel as magical as the aurora itself. What started as an AI experiment became a proper app, and it's still growing.
 
 The best of both worlds: machine precision meets human design. 🌌
 
@@ -106,33 +106,18 @@ Kp-index: 5.0 (Storm!) | Cloud coverage: 80%
 
 ## 🏗️ Architecture
 
-AuroraFix is built with a clean MVVM separation of concerns. Each layer does exactly one thing.
+Aurora Forecast is built with a clean MVVM separation of concerns. Each layer does exactly one thing.
 
-```
-┌──────────────────────────────────────┐
-│  VIEW  (XAML + ViewModel)            │
-│  Displays data · Handles interaction │
-└──────────────┬───────────────────────┘
-               │
-┌──────────────▼───────────────────────┐
-│  SERVICES                            │
-│  AuroraService   → NOAA API          │
-│  WeatherService  → Open-Meteo API    │
-│  GeocodingService → OSM Nominatim    │
-└──────────────┬───────────────────────┘
-               │
-┌──────────────▼───────────────────────┐
-│  HELPERS                             │
-│  ProbabilityDisplayHelper            │
-│    · Aurora probability calc         │
-│    · Cloud coverage adjustment       │
-└──────────────┬───────────────────────┘
-               │
-┌──────────────▼───────────────────────┐
-│  MODELS  (Pure Data)                 │
-│  AuroraForecast · Weather            │
-│  ForecastDay                         │
-└──────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["⚛️ VIEW\nXAML + ViewModel\nDisplays data · Handles interaction"]
+    B["⚙️ SERVICES\nAuroraService → NOAA API\nWeatherService → Open-Meteo\nGeocodingService → OSM Nominatim"]
+    C["🧮 HELPERS\nProbabilityDisplayHelper\nAurora probability calc · Cloud adjustment"]
+    D["📦 MODELS\nAuroraForecast · Weather · ForecastDay\nPure data — no logic"]
+
+    A --> B
+    B --> C
+    C --> D
 ```
 
 ---
@@ -234,8 +219,7 @@ git clone https://github.com/Sigge1511/AuroraForecast-MS
 ---
 
 <p align="center">
-  <b>© 2025 Sigge1511. All Rights Reserved.</b><br/>
-  <i>This software is proprietary. No license is granted for use, copying, modification, or distribution.</i>
+  <b>© 2025 Sigge1511</b> — please don't steal my aurora 🌌
 </p>
 
 <p align="center">
