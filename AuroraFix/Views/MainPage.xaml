@@ -67,7 +67,8 @@
                 </Grid>
 
                 <!--Probability ring-->
-                <Grid HeightRequest="300" WidthRequest="300"
+                <!--Grid 320×320; arc center = (160, 25+135) = (160,160) = grid center-->
+                <Grid HeightRequest="320" WidthRequest="320"
                       HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}"
                       Margin="0,0,0,-30">
                     <Path Stroke="#20FFFFFF"
@@ -75,9 +76,9 @@
                           StrokeLineCap="Round">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="140,10">
-                                    <ArcSegment Point="139.9,10"
-                                                Size="130,130"
+                                <PathFigure StartPoint="160,25">
+                                    <ArcSegment Point="159.9,25"
+                                                Size="135,135"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
                                 </PathFigure>
@@ -90,9 +91,9 @@
                           StrokeDashArray="{Binding StrokeDashValues}">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="140,10">
-                                    <ArcSegment Point="139.9,10"
-                                                Size="130,130"
+                                <PathFigure StartPoint="160,25">
+                                    <ArcSegment Point="159.9,25"
+                                                Size="135,135"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
                                 </PathFigure>
@@ -101,8 +102,7 @@
                     </Path>
 
                     <VerticalStackLayout VerticalOptions="Center"
-                                         HorizontalOptions="Center"
-                                         Margin="-10,3,0,0">
+                                         HorizontalOptions="Center">
                         <Label Text="PROBABILITY"
                                FontSize="{StaticResource FontSizeLabel}"
                                TextColor="{StaticResource TextSubtle}"
@@ -167,7 +167,8 @@
                            FontFamily="MontserratBold"/>
 
                     <CollectionView ItemsSource="{Binding ThreeDayForecast}"
-                                    >
+                                    SelectionMode="None"
+                                    BackgroundColor="Transparent">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid ColumnDefinitions="50, *, Auto"
