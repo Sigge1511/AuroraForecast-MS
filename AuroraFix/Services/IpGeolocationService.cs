@@ -9,6 +9,12 @@ public class IpGeolocationService
     private const string IpApiUrl = "https://ip-api.com/json/";
     private const string StatusSuccess = "success";
     private const int TimeoutSeconds = 3;
+    private const string PropStatus = "status";
+    private const string PropCity = "city";
+    private const string PropLat = "lat";
+    private const string PropLon = "lon";
+    private const string PropCountry = "country";
+    private const string PropRegion = "regionName";
 
     public IpGeolocationService()
     {
@@ -24,15 +30,15 @@ public class IpGeolocationService
             using var doc = JsonDocument.Parse(response);
             var root = doc.RootElement;
 
-            if (root.TryGetProperty("status", out var status) && status.GetString() == StatusSuccess)
+            if (root.TryGetProperty(PropStatus, out var status) && status.GetString() == StatusSuccess)
             {
                 return new IpGeolocationResult
                 {
-                    City    = root.TryGetProperty("city",       out var city)   ? city.GetString()   ?? string.Empty : string.Empty,
-                    Latitude  = root.TryGetProperty("lat",      out var lat)    ? lat.GetDouble()    : 0,
-                    Longitude = root.TryGetProperty("lon",      out var lon)    ? lon.GetDouble()    : 0,
-                    Country = root.TryGetProperty("country",    out var country)? country.GetString() ?? string.Empty : string.Empty,
-                    Region  = root.TryGetProperty("regionName", out var region) ? region.GetString() ?? string.Empty : string.Empty,
+                    City      = root.TryGetProperty(PropCity,    out var city)    ? city.GetString()    ?? string.Empty : string.Empty,
+                    Latitude  = root.TryGetProperty(PropLat,     out var lat)     ? lat.GetDouble()     : 0,
+                    Longitude = root.TryGetProperty(PropLon,     out var lon)     ? lon.GetDouble()     : 0,
+                    Country   = root.TryGetProperty(PropCountry, out var country) ? country.GetString() ?? string.Empty : string.Empty,
+                    Region    = root.TryGetProperty(PropRegion,  out var region)  ? region.GetString()  ?? string.Empty : string.Empty,
                 };
             }
 

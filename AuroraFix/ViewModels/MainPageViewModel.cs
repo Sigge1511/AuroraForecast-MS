@@ -50,7 +50,7 @@ public partial class MainPageViewModel : BaseViewModel
     }
 
     // Called from MainPage.OnAppearing so startup exceptions are surfaced properly.
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
         _ = Task.Run(async () =>
         {
@@ -61,8 +61,12 @@ public partial class MainPageViewModel : BaseViewModel
                 {
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        CityName = location.City;
-                        SearchCityCommand.Execute(null);
+                        // Guard against overwriting a search the user has already started
+                        if (string.IsNullOrWhiteSpace(CityName) && !IsBusy)
+                        {
+                            CityName = location.City;
+                            SearchCityCommand.Execute(null);
+                        }
                     });
                 }
             }
@@ -72,7 +76,7 @@ public partial class MainPageViewModel : BaseViewModel
             }
         });
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
