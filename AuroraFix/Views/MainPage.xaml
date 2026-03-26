@@ -4,15 +4,12 @@
              xmlns:viewmodel="clr-namespace:AuroraFix.ViewModels"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="AuroraFix.Views.MainPage"
-             BackgroundColor="#050810"
+             BackgroundColor="{StaticResource BackgroundDark}"
              Shell.NavBarIsVisible="False">
-    <ContentPage.BindingContext>
-        <viewmodel:MainPageViewModel />
-    </ContentPage.BindingContext>
 
     <Grid>
-        <!--background gif-->
-        <Image Source="giphy.gif" 
+        <!--Background aurora gif-->
+        <Image Source="giphy.gif"
                Aspect="AspectFill"
                Opacity="0.5"
                IsAnimationPlaying="True" />
@@ -25,180 +22,252 @@
                 </LinearGradientBrush>
             </BoxView.Background>
         </BoxView>
-        
-        <!--MAIN CONTENT-->
+
+        <!--Main content-->
         <ScrollView VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="30,25,30,20" Spacing="40">
-                
-                <!--TOP LABEL-->
-                <VerticalStackLayout Spacing="5" 
-                                     HorizontalOptions="Center">
-                    <Label Text="AURORA FORECAST" 
+
+                <!--App title-->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Label Text="AURORA FORECAST"
                            CharacterSpacing="6"
-                           FontSize="20" 
-                           TextColor="#2DCCAA" 
+                           FontSize="{StaticResource FontSizeAppTitle}"
+                           TextColor="{StaticResource AuroraTeal}"
                            HorizontalTextAlignment="Center"
-                           HorizontalOptions="Center" 
+                           HorizontalOptions="Center"
                            FontFamily="MontserratBold"/>
                 </VerticalStackLayout>
-                
-                <!--SEARCH CITY HERE--> 
+
+                <!--City search-->
                 <Grid ColumnDefinitions="*, Auto" Margin="10,0">
-                    <Border Stroke="#40FFFFFF"
+                    <Border Stroke="{StaticResource SearchBorder}"
                             StrokeThickness="1"
                             StrokeShape="RoundRectangle 8">
                         <Entry x:Name="CityEntry"
                                Text="{Binding CityName}"
                                Placeholder="Search location..."
-                               PlaceholderColor="#50FFFFFF"
+                               PlaceholderColor="{StaticResource TextMuted}"
                                TextColor="White"
                                FontFamily="Montserrat"
-                               FontSize="18"
+                               FontSize="{StaticResource FontSizeBodyLarge}"
                                BackgroundColor="Transparent"
-                               Completed="OnSearchClicked" >                        
-                        </Entry>
-                    </Border>                    
+                               IsSpellCheckEnabled="False"
+                               IsTextPredictionEnabled="False"
+                               Completed="OnSearchClicked" />
+                    </Border>
                     <Button Grid.Column="1"
                             Text="GO"
                             Margin="10,0,0,0"
                             Command="{Binding SearchCityCommand}"
                             BackgroundColor="Transparent"
-                            TextColor="#2DCCAA"
+                            TextColor="{StaticResource AuroraTeal}"
                             FontFamily="MontserratBold"
-                            FontSize="14"
-                            Padding="15,0" />                    
+                            FontSize="{StaticResource FontSizeCaption}"
+                            Padding="15,0" />
                 </Grid>
-                
-                <!--CIRCLE WITH RESULT-->
-                <Grid HeightRequest="300" WidthRequest="300" 
+
+                <!--Probability ring-->
+                <Grid HeightRequest="300" WidthRequest="300"
                       HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}"
                       Margin="0,0,0,-30">
-                    <Path Stroke="#20FFFFFF" 
-                         StrokeThickness="12" 
-                           StrokeLineCap="Round">
+                    <Path Stroke="#20FFFFFF"
+                          StrokeThickness="12"
+                          StrokeLineCap="Round">
                         <Path.Data>
                             <PathGeometry>
                                 <PathFigure StartPoint="140,10">
-                                    <ArcSegment Point="139.9,10" 
-                                Size="130,130" 
-                                IsLargeArc="True" 
-                                SweepDirection="Clockwise" />
+                                    <ArcSegment Point="139.9,10"
+                                                Size="130,130"
+                                                IsLargeArc="True"
+                                                SweepDirection="Clockwise" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
                     </Path>
-                    <Path Stroke="#2DCCAA" 
-                            StrokeThickness="12" 
-                           StrokeLineCap="Round"
-                            StrokeDashArray="{Binding StrokeDashValues}">
+                    <Path Stroke="{StaticResource AuroraTeal}"
+                          StrokeThickness="12"
+                          StrokeLineCap="Round"
+                          StrokeDashArray="{Binding StrokeDashValues}">
                         <Path.Data>
                             <PathGeometry>
                                 <PathFigure StartPoint="140,10">
-                                    <ArcSegment Point="139.9,10" 
-                                Size="130,130" 
-                                IsLargeArc="True" 
-                                SweepDirection="Clockwise" />
+                                    <ArcSegment Point="139.9,10"
+                                                Size="130,130"
+                                                IsLargeArc="True"
+                                                SweepDirection="Clockwise" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
                     </Path>
 
-                    <VerticalStackLayout VerticalOptions="Center" 
-                                         HorizontalOptions="Center" 
+                    <VerticalStackLayout VerticalOptions="Center"
+                                         HorizontalOptions="Center"
                                          Margin="-10,3,0,0">
-                        <Label Text="PROBABILITY" 
-                               FontSize="15" TextColor="#70FFFFFF" 
-                               HorizontalOptions="Center" 
-                               CharacterSpacing="4" FontFamily="Montserrat"/>
-                        <Label Text="{Binding Probability, StringFormat='{0:F0}%'}" 
-                               FontSize="90" TextColor="White" 
-                               FontFamily="MontserratBold" 
+                        <Label Text="PROBABILITY"
+                               FontSize="{StaticResource FontSizeLabel}"
+                               TextColor="{StaticResource TextSubtle}"
+                               HorizontalOptions="Center"
+                               CharacterSpacing="4"
+                               FontFamily="Montserrat"/>
+                        <Label Text="{Binding Probability, StringFormat='{0:F0}%'}"
+                               FontSize="{StaticResource FontSizeProbabilityHuge}"
+                               TextColor="White"
+                               FontFamily="MontserratBold"
                                HorizontalOptions="Center">
                             <Label.Shadow>
-                                <Shadow Brush="#2DCCAA" Offset="0,0" Radius="30" Opacity="0.6" />
+                                <Shadow Brush="{StaticResource AuroraTeal}" Offset="0,0" Radius="30" Opacity="0.6" />
                             </Label.Shadow>
                         </Label>
-                        <Label Text="{Binding ActivityLevel}" 
-                               FontSize="30" 
-                               HorizontalOptions="Center" 
-                               TextColor="#2DCCAA" 
+                        <Label Text="{Binding ActivityLevel}"
+                               FontSize="{StaticResource FontSizeActivityLevel}"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource AuroraTeal}"
                                Margin="0,-20,0,0"/>
-                        <Label Text="KP INDEX: " 
-                               FontSize="15" 
-                               HorizontalOptions="Center" 
+                        <Label Text="KP INDEX: "
+                               FontSize="{StaticResource FontSizeLabel}"
+                               HorizontalOptions="Center"
                                TextColor="Gray"
                                Margin="0,5,0,0"/>
-                        <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}" 
-                               FontSize="15" 
-                               HorizontalOptions="Center" 
-                               TextColor="#2DCCAA"/>
+                        <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}"
+                               FontSize="{StaticResource FontSizeLabel}"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource AuroraTeal}"/>
                     </VerticalStackLayout>
                 </Grid>
-                
-                <!--MORE INFO FROM RESULT-->
-                <Border StrokeShape="RoundRectangle 25" 
-                        BackgroundColor="#0AFFFFFF" 
-                        Padding="25,20" 
+
+                <!--Conditions description card-->
+                <Border StrokeShape="RoundRectangle 25"
+                        BackgroundColor="{StaticResource CardBackground}"
+                        Padding="25,20"
                         Stroke="Transparent">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="MORE" 
-                               FontSize="12" 
-                               TextColor="#60FFFFFF" 
-                               HorizontalOptions="Center" 
-                               CharacterSpacing="3" 
+                        <Label Text="MORE"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               TextColor="{StaticResource TextMuted}"
+                               HorizontalOptions="Center"
+                               CharacterSpacing="3"
                                FontFamily="Montserrat"/>
-
-                        <Label Text="{Binding ActivityDescription}" 
-                                       FontSize="15" 
-                                       TextColor="White" 
-                                       HorizontalTextAlignment="Center"
-                                       LineBreakMode="WordWrap" 
-                                       FontFamily="Montserrat"
-                                       LineHeight="1.2"/>
+                        <Label Text="{Binding ActivityDescription}"
+                               FontSize="{StaticResource FontSizeBody}"
+                               TextColor="White"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap"
+                               FontFamily="Montserrat"
+                               LineHeight="1.2"/>
                     </VerticalStackLayout>
                 </Border>
-                
-                <!--3 DAY PROGNOSIS-->
-                <VerticalStackLayout Spacing="20" IsVisible="{Binding IsDataLoaded}">
-                    <Label Text="3-DAY PROGNOSIS" FontSize="12" CharacterSpacing="3" TextColor="#60FFFFFF" Margin="5,0" FontFamily="MontserratBold"/>
 
-                    <CollectionView ItemsSource="{Binding ThreeDayForecast}">
+                <!--3-day forecast-->
+                <VerticalStackLayout Spacing="20" IsVisible="{Binding IsDataLoaded}">
+                    <Label Text="3-DAY FORECAST"
+                           FontSize="{StaticResource FontSizeCaption}"
+                           CharacterSpacing="3"
+                           TextColor="{StaticResource TextMuted}"
+                           Margin="5,0"
+                           FontFamily="MontserratBold"/>
+
+                    <CollectionView ItemsSource="{Binding ThreeDayForecast}"
+                                    >
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <Grid ColumnDefinitions="50, *, Auto" Padding="10,20">
-                                    <Label Text="{Binding IconEmoji}" FontSize="28" VerticalOptions="Center" />
-                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0">
-                                        <Label Text="{Binding Date}" TextColor="White" FontFamily="MontserratBold" FontSize="16" />
-                                        <Label Text="{Binding KpIndex, StringFormat='KP INDEX: {0:F1}'}" 
-                                               FontSize="16" TextColor="#2DCCAA" 
-                                               FontFamily="Montserrat" Opacity="0.7"/>
-                                    </VerticalStackLayout>
-                                    <Label Grid.Column="2" 
-                                           Text="{Binding Probability, StringFormat='{0:F0}%'}"
-                                           TextColor="#2DCCAA" 
-                                           FontSize="20" 
-                                           FontFamily="MontserratBold" 
+                                <Grid ColumnDefinitions="50, *, Auto"
+                                      RowDefinitions="Auto, 1"
+                                      Padding="10,20">
+                                    <Label Text="{Binding IconEmoji}"
+                                           FontSize="{StaticResource FontSizeForecastIcon}"
                                            VerticalOptions="Center" />
-                                    <BoxView Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="0.5" Color="#10FFFFFF" VerticalOptions="End" Margin="0,20,0,0" />
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0">
+                                        <Label Text="{Binding Date}"
+                                               TextColor="White"
+                                               FontFamily="MontserratBold"
+                                               FontSize="{StaticResource FontSizeForecastDay}" />
+                                        <Label Text="{Binding KpIndex, StringFormat='KP INDEX: {0:F1}'}"
+                                               FontSize="{StaticResource FontSizeForecastDay}"
+                                               TextColor="{StaticResource AuroraTeal}"
+                                               FontFamily="Montserrat"
+                                               Opacity="0.7"/>
+                                        <Label Text="{Binding DarknessWindow}"
+                                               FontSize="{StaticResource FontSizeDarknessWindow}"
+                                               TextColor="{StaticResource TextMuted}"
+                                               FontFamily="Montserrat">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding DarknessWindow}" Value="">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Probability, StringFormat='{0:F0}%'}"
+                                           TextColor="{StaticResource AuroraTeal}"
+                                           FontSize="{StaticResource FontSizeForecastProb}"
+                                           FontFamily="MontserratBold"
+                                           VerticalOptions="Center" />
+                                    <BoxView Grid.Row="1" Grid.ColumnSpan="3"
+                                             HeightRequest="0.5"
+                                             Color="{StaticResource DividerLine}"
+                                             VerticalOptions="End" />
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </VerticalStackLayout>
-                
-                <!--PROPPS TO NOAA-->
-                <Label Text="SOURCE: NOAA SPACE WEATHER" 
-                       FontSize="10" TextColor="#20FFFFFF" FontFamily="Montserrat"
-                       HorizontalOptions="Center" 
+
+                <!--Source attribution-->
+                <Label Text="SOURCE: NOAA SPACE WEATHER"
+                       FontSize="{StaticResource FontSizeFooter}"
+                       TextColor="{StaticResource TextVeryMuted}"
+                       FontFamily="Montserrat"
+                       HorizontalOptions="Center"
                        Margin="0,20"/>
 
             </VerticalStackLayout>
         </ScrollView>
 
-        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#D9050810">
-            <ActivityIndicator IsRunning="True" Color="#2DCCAA" WidthRequest="50" HeightRequest="50" VerticalOptions="Center" HorizontalOptions="Center" />
+        <!--Loading overlay-->
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="{StaticResource LoadingOverlay}">
+            <ActivityIndicator IsRunning="True"
+                               Color="{StaticResource AuroraTeal}"
+                               WidthRequest="50"
+                               HeightRequest="50"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center" />
+        </Grid>
+        <!--Error overlay-->
+        <Grid IsVisible="{Binding HasError}" BackgroundColor="{StaticResource LoadingOverlay}" ZIndex="10">
+            <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                <Border StrokeShape="RoundRectangle 25"
+                        BackgroundColor="{StaticResource CardBackground}"
+                        Padding="28"
+                        Stroke="Transparent"
+                        MaximumWidthRequest="320">
+                    <VerticalStackLayout Spacing="18" HorizontalOptions="Center">
+                        <Label Text="!"
+                               FontSize="32"
+                               TextColor="{StaticResource AuroraTeal}"
+                               FontFamily="MontserratBold"
+                               HorizontalOptions="Center"/>
+                        <Label Text="{Binding ErrorMessage}"
+                               FontSize="{StaticResource FontSizeBodyLarge}"
+                               TextColor="White"
+                               FontFamily="Montserrat"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap"
+                               LineHeight="1.2"/>
+                        <Button Text="OK"
+                                Command="{Binding DismissErrorCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource AuroraTeal}"
+                                FontFamily="MontserratBold"
+                                BorderColor="{StaticResource AuroraTeal}"
+                                BorderWidth="2"
+                                CornerRadius="25"
+                                Padding="0,10"
+                                HorizontalOptions="Fill"
+                                Margin="0,10,0,0"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </ContentPage>
-
-
