@@ -23,10 +23,11 @@ public static class ProbabilityDisplayHelper
 
         double baseProbability = diff switch
         {
-            >= 1 => 95,
-            >= 0 => 70 + (diff * 25),
-            >= -1 => 30 + (diff + 1) * 40,
-            >= -2 => 5 + (diff + 2) * 25,
+            >= 3.0 => 90,
+            >= 2.0 => 60 + (diff - 2.0) * 30,
+            >= 1.0 => 35 + (diff - 1.0) * 25,
+            >= 0.0 => 10 + diff * 25,
+            >= -1.0 => 2 + (diff + 1.0) * 8,
             _ => 0
         };
 
