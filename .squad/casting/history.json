@@ -1,0 +1,25 @@
+{
+  "universe_usage_history": [
+    {
+      "timestamp": "2026-03-02T15:53:08Z",
+      "universe": "Custom Witch Coven",
+      "reason": "User requested a witchy female squad"
+    }
+  ],
+  "assignment_cast_snapshots": {
+    "assignment-20260302-155308": {
+      "timestamp": "2026-03-02T15:53:08Z",
+      "universe": "Custom Witch Coven",
+      "members": [
+        "Morgana",
+        "Circe",
+        "Hecate",
+        "Selene",
+        "Nyx",
+        "Rowan",
+        "Freya",
+        "Vespera"
+      ]
+    }
+  }
+}

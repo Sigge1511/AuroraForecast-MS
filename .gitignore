@@ -62,3 +62,4 @@ google-services.json
 .squad/decisions/inbox/
 .squad/sessions/
 .squad-workstream
+*.user.csproj

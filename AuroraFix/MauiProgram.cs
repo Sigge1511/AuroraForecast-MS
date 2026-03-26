@@ -16,12 +16,23 @@ namespace AuroraFix
                 {
                     fonts.AddFont("Montserrat-Regular.ttf", "Montserrat");
                     fonts.AddFont("Montserrat-Bold.ttf", "MontserratBold");
+                })
+                .ConfigureMauiHandlers(handlers =>
+                {
+                    Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoUnderline", (handler, view) =>
+                    {
+#if WINDOWS
+                        handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                        handler.PlatformView.Resources["TextControlBorderThemeThicknessFocused"] = new Microsoft.UI.Xaml.Thickness(0);
+#endif
+                    });
                 });
 
 
             // Register Services
             builder.Services.AddSingleton<AuroraService>();
             builder.Services.AddSingleton<GeocodingService>();
+            builder.Services.AddSingleton<WeatherService>();
 
             // Register ViewModels
             builder.Services.AddTransient<MainPageViewModel>();

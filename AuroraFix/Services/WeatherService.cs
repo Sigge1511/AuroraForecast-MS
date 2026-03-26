@@ -1,229 +1,177 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using AuroraFix.Models;
 
 namespace AuroraFix.Services;
 
 public class WeatherService
 {
-    private static WeatherService? _instance;
-    private static readonly object _lock = new();
     private readonly HttpClient _httpClient;
 
-    // Open-Metero API, free and no key needed
+    // Open-Meteo API — free, no key required
     private const string BaseUrl = "https://api.open-meteo.com/v1/forecast";
+    private const double TestLatitude = 59.3293;   // Stockholm — used for health checks
+    private const double TestLongitude = 18.0686;
 
-    private WeatherService()
+    public WeatherService()
     {
-        _httpClient = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(30)
-        };
+        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "AuroraFix-MAUI/1.0");
-    }
-
-    public static WeatherService Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                lock (_lock)
-                {
-                    _instance ??= new WeatherService();
-                }
-            }
-            return _instance;
-        }
     }
 
     public async Task<Weather?> GetCurrentWeatherAsync(double latitude, double longitude)
     {
         try
         {
-            // Open-Meteo current weather parametrar
             var url = $"{BaseUrl}?" +
                       $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
                       $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"current=temperature_2m,relative_humidity_2m,apparent_temperature," +
-                      $"precipitation,cloud_cover,wind_speed_10m,wind_direction_10m&" +
+                      $"current=cloud_cover,is_day&" +
+                      $"daily=sunrise,sunset&" +
                       $"timezone=auto";
 
-            System.Diagnostics.Debug.WriteLine($"=== Weather API Request: {url} ===");
-
             var response = await _httpClient.GetStringAsync(url);
-            System.Diagnostics.Debug.WriteLine($"=== Weather Response: {response.Substring(0, Math.Min(300, response.Length))}... ===");
-
             var json = JsonSerializer.Deserialize<JsonElement>(response);
 
-            if (json.TryGetProperty("current", out var current))
-            {
-                var conditions = new Weather
-                {
-                    CloudCoverage = GetDoubleValue(current, "cloud_cover"),
-                    ForecastTime = DateTime.UtcNow,
-                    WeatherDescription = GetWeatherDescription(
-                        GetDoubleValue(current, "cloud_cover")
-                    )
-                };
+            if (!json.TryGetProperty("current", out var current))
+                return null;
 
-                System.Diagnostics.Debug.WriteLine($"=== Weather Parsed: {conditions.CloudCoverage}% clouds ===");
-                return conditions;
+            var cloudCoverage = GetDoubleValue(current, "cloud_cover");
+            var conditions = new Weather
+            {
+                CloudCoverage = cloudCoverage,
+                ForecastTime = DateTime.UtcNow,
+                IsDay = (int)GetDoubleValue(current, "is_day") == 1,
+                WeatherDescription = GetWeatherDescription(cloudCoverage)
+            };
+
+            if (json.TryGetProperty("daily", out var todayDaily))
+            {
+                if (todayDaily.TryGetProperty("sunrise", out var srArr) && srArr.GetArrayLength() > 0)
+                    if (DateTime.TryParse(srArr[0].GetString(), out var sr)) conditions.Sunrise = sr;
+                if (todayDaily.TryGetProperty("sunset", out var ssArr) && ssArr.GetArrayLength() > 0)
+                    if (DateTime.TryParse(ssArr[0].GetString(), out var ss)) conditions.Sunset = ss;
             }
 
-            System.Diagnostics.Debug.WriteLine("=== Weather: No 'current' property in response ===");
-            return null;
+            return conditions;
         }
         catch (HttpRequestException ex)
         {
-            System.Diagnostics.Debug.WriteLine($"=== Weather HTTP Error: {ex.Message} ===");
+            System.Diagnostics.Debug.WriteLine($"WeatherService: HTTP error in current weather: {ex.Message}");
             return null;
         }
         catch (JsonException ex)
         {
-            System.Diagnostics.Debug.WriteLine($"=== Weather JSON Error: {ex.Message} ===");
+            System.Diagnostics.Debug.WriteLine($"WeatherService: JSON parse error in current weather: {ex.Message}");
             return null;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"=== Weather Unknown Error: {ex.Message} ===");
+            System.Diagnostics.Debug.WriteLine($"WeatherService: Unexpected error in current weather: {ex.Message}");
             return null;
         }
     }
 
-   
-    public async Task<List<Weather>> GetThreeDayForecastAsync(double latitude, double longitude)
+    // Fetches cloud coverage, sunrise and sunset for today + 3 days ahead (4 total).
+    // 4 days are needed because the NOAA 3-day forecast covers tomorrow through day+3,
+    // so index 0 here (today) is only used for weather matching on the current-day display.
+    public async Task<List<Weather>> GetFourDayForecastAsync(double latitude, double longitude)
     {
         try
         {
             var url = $"{BaseUrl}?" +
                       $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
                       $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"daily=cloud_cover_mean,temperature_2m_max,temperature_2m_min," +
-                      $"precipitation_sum,wind_speed_10m_max&" +
-                      $"forecast_days=3&" +
+                      $"daily=cloud_cover_mean,sunrise,sunset&" +
+                      $"forecast_days=4&" +
                       $"timezone=auto";
 
             var response = await _httpClient.GetStringAsync(url);
             var json = JsonSerializer.Deserialize<JsonElement>(response);
-
             var forecasts = new List<Weather>();
 
-            if (json.TryGetProperty("daily", out var daily))
+            if (!json.TryGetProperty("daily", out var daily))
+                return forecasts;
+
+            var times = new List<JsonElement>();
+            var cloudCovers = new List<JsonElement>();
+            if (daily.TryGetProperty("time", out var timeArr))
+                times = timeArr.EnumerateArray().ToList();
+            if (daily.TryGetProperty("cloud_cover_mean", out var cloudArr))
+                cloudCovers = cloudArr.EnumerateArray().ToList();
+            daily.TryGetProperty("sunrise", out var sunriseArr);
+            daily.TryGetProperty("sunset", out var sunsetArr);
+
+            for (int i = 0; i < Math.Min(4, Math.Min(cloudCovers.Count, times.Count)); i++)
             {
-                var times = daily.GetProperty("time").EnumerateArray().ToList();
-                var cloudCovers = daily.GetProperty("cloud_cover_mean").EnumerateArray().ToList();
-                
-
-                for (int i = 0; i < Math.Min(3, cloudCovers.Count); i++)
+                double cloudCover = 0;
+                try
                 {
-                    var cloudCover = cloudCovers[i].GetDouble();
-
-                    forecasts.Add(new Weather
-                    {
-                        ForecastTime = DateTime.Parse(times[i].GetString()!),
-                        CloudCoverage = cloudCover,
-                        WeatherDescription = GetWeatherDescription(cloudCover)
-                    });
+                    cloudCover = cloudCovers[i].GetDouble();
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"WeatherService: error parsing cloud_cover_mean: {ex.Message}");
+                }
+                DateTime? sunrise = null, sunset = null;
+
+                if (sunriseArr.ValueKind != JsonValueKind.Undefined && i < sunriseArr.GetArrayLength())
+                    if (DateTime.TryParse(sunriseArr[i].GetString(), out var sr)) sunrise = sr;
+                if (sunsetArr.ValueKind != JsonValueKind.Undefined && i < sunsetArr.GetArrayLength())
+                    if (DateTime.TryParse(sunsetArr[i].GetString(), out var ss)) sunset = ss;
+
+                DateTime forecastTime = DateTime.MinValue;
+                if (times[i].ValueKind == JsonValueKind.String && DateTime.TryParse(times[i].GetString(), out var ft))
+                    forecastTime = ft;
+                else
+                    System.Diagnostics.Debug.WriteLine($"WeatherService: error parsing forecast time at index {i}");
+
+                forecasts.Add(new Weather
+                {
+                    ForecastTime = forecastTime,
+                    CloudCoverage = cloudCover,
+                    WeatherDescription = GetWeatherDescription(cloudCover),
+                    Sunrise = sunrise,
+                    Sunset = sunset
+                });
             }
 
-            System.Diagnostics.Debug.WriteLine($"=== Fetched {forecasts.Count} days of weather forecast ===");
             return forecasts;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"=== 3-day forecast error: {ex.Message} ===");
+            System.Diagnostics.Debug.WriteLine($"WeatherService: Error fetching 4-day forecast: {ex.Message}");
             return new List<Weather>();
         }
-    }
-
-    /// <summary>
-    /// Hämtar väder för specifik natt-tid (perfekt för norrsken!)
-    /// </summary>
-    /// <param name="latitude">Latitud</param>
-    /// <param name="longitude">Longitud</param>
-    /// <param name="nightHour">Timme på natten (t.ex. 23 för 23:00)</param>
-    /// <returns>Väderförhållanden för den timmen</returns>
-    public async Task<Weather?> GetNightWeatherAsync(double latitude, double longitude, int nightHour = 23)
-    {
-        try
-        {
-            var url = $"{BaseUrl}?" +
-                      $"latitude={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"longitude={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&" +
-                      $"hourly=temperature_2m,cloud_cover,precipitation&" +
-                      $"forecast_days=1&" +
-                      $"timezone=auto";
-
-            var response = await _httpClient.GetStringAsync(url);
-            var json = JsonSerializer.Deserialize<JsonElement>(response);
-
-            if (json.TryGetProperty("hourly", out var hourly))
-            {
-                var times = hourly.GetProperty("time").EnumerateArray().ToList();
-                var temps = hourly.GetProperty("temperature_2m").EnumerateArray().ToList();
-                var clouds = hourly.GetProperty("cloud_cover").EnumerateArray().ToList();
-                var precip = hourly.GetProperty("precipitation").EnumerateArray().ToList();
-
-                // Hitta index för önskad timme
-                for (int i = 0; i < times.Count; i++)
-                {
-                    var time = DateTime.Parse(times[i].GetString()!);
-                    if (time.Hour == nightHour)
-                    {
-                        return new Weather
-                        {
-                            ForecastTime = time,
-                            CloudCoverage = clouds[i].GetDouble(),
-                            WeatherDescription = GetWeatherDescription(clouds[i].GetDouble())
-                        };
-                    }
-                }
-            }
-
-            return null;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"=== Night weather error: {ex.Message} ===");
-            return null;
-        }
-    }
-
-    private double GetDoubleValue(JsonElement element, string propertyName)
-    {
-        if (element.TryGetProperty(propertyName, out var prop))
-        {
-            if (prop.ValueKind == System.Text.Json.JsonValueKind.Number)
-                return prop.GetDouble();
-            if (prop.ValueKind == System.Text.Json.JsonValueKind.String)
-                if (double.TryParse(prop.GetString(), out var val))
-                    return val;
-        }
-        return 0;
-    }
-
-    private string GetWeatherDescription(double cloudCover)
-    {
-        return cloudCover switch
-        {
-            < 5 => "Clear skies",
-            < 20 => "Partly cloudy",
-            < 50 => "Mostly cloudy",
-            _ => "Overcast"
-        };        
     }
 
     public async Task<bool> IsApiAvailableAsync()
     {
         try
         {
-            var result = await GetCurrentWeatherAsync(59.3293, 18.0686); // Stockholm as test location
-            return result != null;
+            return await GetCurrentWeatherAsync(TestLatitude, TestLongitude) != null;
         }
         catch
         {
             return false;
         }
+    }
+
+    // Maps cloud coverage percentage to a human-readable sky condition label.
+    public static string GetWeatherDescription(double cloudCover) => cloudCover switch
+    {
+        < 5  => "Clear skies",
+        < 20 => "Partly cloudy",
+        < 50 => "Mostly cloudy",
+        _    => "Overcast"
+    };
+
+    private double GetDoubleValue(JsonElement element, string propertyName)
+    {
+        if (element.TryGetProperty(propertyName, out var prop))
+        {
+            if (prop.ValueKind == JsonValueKind.Number) return prop.GetDouble();
+            if (prop.ValueKind == JsonValueKind.String && double.TryParse(prop.GetString(), out var val)) return val;
+        }
+        return 0;
     }
 }

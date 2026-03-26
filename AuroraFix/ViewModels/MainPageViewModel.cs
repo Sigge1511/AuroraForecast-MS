@@ -12,36 +12,44 @@ public partial class MainPageViewModel : BaseViewModel
 {
     private readonly AuroraService _auroraService;
     private readonly GeocodingService _geocodingService;
-    private readonly ProbabilityDisplayHelper _helper;
+    private readonly WeatherService _weatherService;
 
     [ObservableProperty] private string cityName = string.Empty;
     [ObservableProperty] private double currentKpIndex;
     [ObservableProperty] private string activityLevel = string.Empty;
     [ObservableProperty] private string activityDescription = string.Empty;
-
-    [ObservableProperty]
-    private DoubleCollection strokeDashValues;
+    [ObservableProperty] private double cloudCoverage;
+    [ObservableProperty] private string cloudCondition = string.Empty;
     [ObservableProperty] private double probability;
-
-    //[ObservableProperty] private string currentVideoSource = string.Empty;
     [ObservableProperty] private string locationInfo = string.Empty;
     [ObservableProperty] private bool isDataLoaded;
     [ObservableProperty] private ObservableCollection<ForecastDay> threeDayForecast;
-    
+    [ObservableProperty] private DoubleCollection strokeDashValues;
+
     [RelayCommand]
     private async Task RefreshAsync() => await SearchCityAsync();
 
-    public MainPageViewModel()
+    public MainPageViewModel(
+        AuroraService auroraService,
+        GeocodingService geocodingService,
+        WeatherService weatherService)
     {
-        _auroraService = new AuroraService();
-        _geocodingService = new GeocodingService();
-        _helper = new ProbabilityDisplayHelper();
+        _auroraService = auroraService;
+        _geocodingService = geocodingService;
+        _weatherService = weatherService;
 
         Title = "Aurora Forecast";
         ThreeDayForecast = new ObservableCollection<ForecastDay>();
-        //CurrentVideoSource = "aurora_low.mp4";
+        ActivityDescription = "Enter a location above to check aurora conditions.";
+        StrokeDashValues = ProbabilityDisplayHelper.UpdateCircle(0);
+        IsDataLoaded = true;
+    }
 
-        _ = LoadDefaultLocationAsync();
+    // Called from MainPage.OnAppearing so startup exceptions are surfaced properly.
+    public async Task InitializeAsync()
+    {
+        CityName = "Östersund";
+        await SearchCityAsync();
     }
 
     [RelayCommand]
@@ -52,7 +60,6 @@ public partial class MainPageViewModel : BaseViewModel
             SetError("Please enter a city name");
             return;
         }
-
         if (IsBusy) return;
 
         try
@@ -64,21 +71,25 @@ public partial class MainPageViewModel : BaseViewModel
             var location = await FetchLocationAsync(CityName);
             if (location == null) return;
 
-            // 2. Update UI display for location
             UpdateLocationDisplay(location);
 
-            // Update current aurora data and probability
-            await UpdateCurrentWeatherAsync(location);
+            // Fire all 4 HTTP calls simultaneously — none depends on another at issue time.
+            var forecastTask = _auroraService.GetForecastForLocationAsync(location.CityName, location.Latitude, location.Longitude);
+            var weatherTask  = _weatherService.GetCurrentWeatherAsync(location.Latitude, location.Longitude);
+            var threeDayTask = _auroraService.GetThreeDayForecastAsync(location.Latitude);
+            var fourDayTask  = _weatherService.GetFourDayForecastAsync(location.Latitude, location.Longitude);
 
-            // Update forecast list
-            await UpdateForecastAsync(location.Latitude);
+            await Task.WhenAll(forecastTask, weatherTask, threeDayTask, fourDayTask);
+
+            ApplyCurrentAuroraAndWeather(location, forecastTask.Result, weatherTask.Result);
+            ApplyThreeDayForecastWithWeather(location.Latitude, threeDayTask.Result, fourDayTask.Result);
 
             IsDataLoaded = true;
         }
         catch (Exception ex)
         {
             SetError($"Error fetching data: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Error: {ex}");
+            IsDataLoaded = true;
         }
         finally
         {
@@ -86,13 +97,11 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    private async Task<SelectedLocation> FetchLocationAsync(string city)
+    private async Task<SelectedLocation?> FetchLocationAsync(string city)
     {
         var location = await _geocodingService.GetLocationFromCityAsync(city);
         if (location == null)
-        {
             SetError($"Could not find city: {city}");
-        }
         return location;
     }
 
@@ -101,43 +110,50 @@ public partial class MainPageViewModel : BaseViewModel
         LocationInfo = $"{location.CityName} ({location.Latitude:F2}°, {location.Longitude:F2}°)";
     }
 
-    private async Task UpdateCurrentWeatherAsync(SelectedLocation location)
+    private void ApplyCurrentAuroraAndWeather(SelectedLocation location, AuroraForecast forecast, Weather? weather)
     {
-        var forecast = await _auroraService.GetForecastForLocationAsync(
-            location.CityName, location.Latitude, location.Longitude);
-
         CurrentKpIndex = forecast.KpIndex;
-        Probability = _helper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude);
-        ActivityLevel = _helper.GetActivityLevelText(Probability);
-        ActivityDescription = forecast.GetActivityDescription(Probability); //FOR THE DESCRIPTION BELOW
-
-        StrokeDashValues = _helper.UpdateCircle(Probability); //FILLS THE CIRCLE IN %
-
+        var clouds = weather?.CloudCoverage ?? 0;
+        var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude);
+        Probability = ProbabilityDisplayHelper.AdjustForCloudCoverage(baseProbability, clouds);
+        CloudCoverage = clouds;
+        CloudCondition = ProbabilityDisplayHelper.GetCloudImpactLabel(clouds);
+        ActivityLevel = ProbabilityDisplayHelper.GetActivityLevelText(Probability);
+        StrokeDashValues = ProbabilityDisplayHelper.UpdateCircle(Probability);
+        bool isDark = !(weather?.IsDay ?? false);
+        bool isMidnightSun = GuiMessageHelper.IsMidnightSun(weather?.Sunrise, weather?.Sunset, location.Latitude);
+        DateTime? darkFrom = (!isDark && !isMidnightSun) ? weather?.Sunset : null;
+        ActivityDescription = GuiMessageHelper.GetActivityDescription(
+            Probability, CurrentKpIndex, clouds, baseProbability, isDark, darkFrom, isMidnightSun);
     }
 
-    private async Task UpdateForecastAsync(double latitude)
+    private void ApplyThreeDayForecastWithWeather(double latitude, IReadOnlyList<ForecastDay> auroraForecasts, List<Weather> weatherForecasts)
     {
-        var forecastDays = await _auroraService.GetThreeDayForecastAsync(latitude);
-
-        ThreeDayForecast.Clear();
-        foreach (var day in forecastDays)
+        var newItems = new List<ForecastDay>(auroraForecasts.Count);
+        foreach (var day in auroraForecasts)
         {
-            // 1. Räkna ut sannolikhet för denna specifika dag
-            day.Probability = _helper.CalculateAuroraProbability(day.KpIndex, latitude);
+            var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(day.KpIndex, latitude);
+            var weather = weatherForecasts.FirstOrDefault(w => w.ForecastTime.Date == day.ForecastDate.Date);
 
-            // 2. Sätt emojin baserat på den nyss uträknade sannolikheten
-            // (Använd din nya metod som går på Probability!)
-            day.IconEmoji = AuroraService.GetIconEmoji(day.Probability);
+            if (weather != null)
+            {
+                day.Probability = ProbabilityDisplayHelper.AdjustForCloudCoverage(baseProbability, weather.CloudCoverage);
+                day.CloudCoverage = weather.CloudCoverage;
+                day.ActualProbability = (int)day.Probability;
+                day.IconEmoji = ProbabilityDisplayHelper.GetIconEmoji(day.Probability);
+                day.Sunrise = weather.Sunrise;
+                day.Sunset = weather.Sunset;
+                day.DarknessWindow = GuiMessageHelper.GetDarknessWindowText(weather.Sunrise, weather.Sunset, latitude);
+            }
+            else
+            {
+                day.Probability = baseProbability;
+                day.ActualProbability = (int)baseProbability;
+                day.IconEmoji = ProbabilityDisplayHelper.GetIconEmoji(baseProbability);
+            }
 
-            ThreeDayForecast.Add(day);
+            newItems.Add(day);
         }
-    }
-            
-    private async Task LoadDefaultLocationAsync()
-    {
-        CityName = "Östersund";
-        await SearchCityAsync();
+        ThreeDayForecast = new ObservableCollection<ForecastDay>(newItems);
     }
 }
-
-
