@@ -1,0 +1,48 @@
+# Keep only the 5 essential files on GitHub
+# Exclude all noise: logs, templates, histories, casting, sessions
+
+# Templates — boilerplate, no value on GitHub
+templates/
+
+# Session & orchestration logs — local diagnostics
+log/
+orchestration-log/
+sessions/
+
+# Casting machinery — internal Squad plumbing
+casting/
+casting-history.json
+casting-policy.json
+casting-registry.json
+
+# Agent history files — personal/local knowledge
+agents/*/history.md
+agents/*/history-archive.md
+agents/_alumni/
+
+# Loose root-level template/reference files
+charter.md
+scribe-charter.md
+roster.md
+history.md
+orchestration-log.md
+run-output.md
+raw-agent-output.md
+multi-agent-format.md
+constraint-tracking.md
+issue-lifecycle.md
+plugin-marketplace.md
+mcp-config.md
+skill.md
+copilot-instructions.md
+config.json
+gitmsg.tmp
+
+# Identity/wisdom — local context
+identity/
+
+# Skills — earned knowledge, kept locally
+skills/
+
+# Decisions inbox — transient, merged by Scribe
+decisions/
