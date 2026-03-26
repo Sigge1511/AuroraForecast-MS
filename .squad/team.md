@@ -23,8 +23,7 @@
 | Freya | Technical Writer | `.squad/agents/freya/charter.md` | ✅ Active |
 | Vespera | Security Specialist | `.squad/agents/vespera/charter.md` | ✅ Active |
 | Calista | UX Specialist | `.squad/agents/calista/charter.md` | ✅ Active |
-| Lyra | Motion & Visual Experience Designer | `.squad/agents/lyra/charter.md` | ✅ Active |
-| Ember | Performance Engineer | `.squad/agents/ember/charter.md` | ✅ Active |
+| Lyra | Performance Engineer | `.squad/agents/lyra/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.squad/agents/scribe/charter.md` | 📋 Silent |
 | Ralph | Work Monitor | — | 🔄 Monitor |
 
