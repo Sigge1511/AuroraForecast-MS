@@ -173,7 +173,8 @@
                             <DataTemplate>
                                 <Grid ColumnDefinitions="50, *, Auto"
                                       RowDefinitions="Auto, 1"
-                                      Padding="10,20">
+                                      Padding="10,20"
+                                      BackgroundColor="Transparent">
                                     <Label Text="{Binding IconEmoji}"
                                            FontSize="{StaticResource FontSizeForecastIcon}"
                                            VerticalOptions="Center" />
