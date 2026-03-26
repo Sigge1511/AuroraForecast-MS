@@ -70,7 +70,7 @@
                 <!--Grid 320×320; arc center = (160, 25+135) = (160,160) = grid center-->
                 <Grid HeightRequest="320" WidthRequest="320"
                       HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}"
-                      Margin="0,0,0,-30">
+                      Margin="0,0,0,-25">
                     <Path Stroke="#20FFFFFF"
                           StrokeThickness="12"
                           StrokeLineCap="Round">
