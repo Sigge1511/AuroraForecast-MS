@@ -33,6 +33,22 @@
 
 ## Learnings
 
+### 2026-03-24: Error handling audit in AuroraService and WeatherService
+
+**Files reviewed:**
+- AuroraService.cs
+- WeatherService.cs
+
+**Findings and changes:**
+- Added try/catch around JsonElement.GetDouble() in AuroraService to prevent unhandled exceptions during Kp parsing, with Debug.WriteLine logging.
+- Guarded AddForecastDay against empty kpValues and log if empty.
+- In WeatherService, replaced direct property access for time/cloud_cover_mean with TryGetProperty and null checks to avoid null dereference and out-of-range errors.
+- Wrapped cloud_cover_mean and forecast time parsing in try/catch with Debug.WriteLine logging for parse errors.
+- Ensured all LINQ .Average() and collection accesses are guarded against empty collections or nulls.
+- No silent swallows found; all catch blocks now log errors.
+
+**Outcome:**
+Both services now handle all I/O, parsing, and LINQ operations robustly, logging errors and returning safe fallbacks as required by conventions.
 ### 2026-03-21: Unicode/Swedish city search bug investigation & fix
 
 **What was broken:**

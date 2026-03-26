@@ -27,3 +27,13 @@ Targets Android, iOS, macCatalyst, Windows.
 - No certificate pinning — acceptable for public weather APIs
 - User-Agent header `"AuroraFixApp/1.0"` set on GeocodingService ✓ (OSM policy requirement)
 - No sensitive data in transit or at rest
+
+## Learnings
+- **Date:** 2024-05-23
+- **Topic:** Error Handling & UI Safety
+- **Context:** Review of `AuroraFix` post-build error hardening.
+- **Observation:** 
+  - The `CancellationTokenSource` pattern in `BaseViewModel` relies on GC rather than explicit `Dispose()`. In high-throughput scenarios, this could be a resource leak, but for a user-triggered error toast (4s duration), it is acceptable.
+  - MAUI `Label` text binding is safe from XSS by default (renders as plain text).
+  - Explicit parsing of external NOAA text files using `double.TryParse` provides good defense against malformed data causing crashes.
+- **Action:** Approved the changes. Added note about CTS disposal for future refactoring if error rate increases.

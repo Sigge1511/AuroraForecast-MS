@@ -1,5 +1,12 @@
 # Selene — Frontend Engineer
 
+## 2026-03-24: Error overlay/toast implemented
+- Added a styled error overlay to MainPage.xaml, matching aurora design tokens (dark scrim, card, Montserrat, teal accent, rounded corners)
+- Overlay auto-dismisses after 4s (timer/cancellation logic in BaseViewModel)
+- OK button (DismissErrorCommand) for immediate dismiss
+- All logic ViewModel-driven, no code-behind
+
+
 ## Project: AuroraFix (seeded 2026-03-21)
 
 **Namespace:** AuroraFix · .NET MAUI net10.0
