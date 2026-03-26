@@ -52,3 +52,13 @@ Targets: Android, iOS, macCatalyst, Windows.
 4. **AuroraForecast model had behavior.** `GetActivityDescription()` was the only method on the model — 60+ lines of conditional UI text with 7 parameters, none of which were model properties. Classic misplaced logic. After extraction, model becomes a pure data class (7 auto-properties, zero methods).
 
 5. **VM orchestration pattern confirmed.** The ViewModel's `UpdateCurrentAuroraAndWeatherAsync` and `UpdateThreeDayForecastWithWeatherAsync` are legitimate orchestration — they call services, assemble parameters, call helpers, and set observable properties. This is correct MVVM. The only things that needed to move out were the two static pure-function methods.
+
+### 2026-03-26: Refactor executed (commit 3ed5598, branch Refactor-and-codereview)
+
+All planned moves from the 2026-03-22 audit have been implemented:
+- `GuiMessageHelper.cs` created — `GetActivityDescription`, `GetDarknessWindowText`, `IsMidnightSun` live here
+- `AuroraForecast.cs` is now a pure data class (zero methods)
+- `GetKpActivityLevel` + `GetIconEmoji` moved from `AuroraService` → `ProbabilityDisplayHelper`
+- Named constants added to `ProbabilityDisplayHelper` (KpLatitudeOffset, KpLatitudeDivisor, CircleArcUnits)
+- `double baseProbability = -1` sentinel fixed to `double? baseProbability = null`
+- Build verified clean. Vespera post-build review: security-neutral, all clear.

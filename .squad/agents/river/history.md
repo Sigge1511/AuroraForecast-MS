@@ -55,9 +55,17 @@
 ---
 
 ## Known Issues to Watch (AuroraFix)
-- **Duplicate probability formula** — `AuroraService.CalculateProbability()` and `ProbabilityDisplayHelper.CalculateAuroraProbability()` do similar work; ViewModel uses the Helper, the Service uses its own. This is spaghetti — needs consolidation.
 - **WeatherService manual singleton** — bypasses DI; fine for now but flag if the codebase grows
 - **Debug.WriteLine calls** — useful during development, should be pruned before any production release
+
+### 2026-03-26: Refactor executed — issues resolved (commit 3ed5598)
+
+- ✅ **Service display leakage fixed** — `GetActivityLevel` + `GetIconEmoji` moved from `AuroraService` to `ProbabilityDisplayHelper`
+- ✅ **VM static methods misplacement fixed** — `IsMidnightSun` + `GetDarknessWindowText` moved to `GuiMessageHelper`
+- ✅ **Model behaviour anti-pattern fixed** — `GetActivityDescription` moved from `AuroraForecast` to `GuiMessageHelper`; model is now pure data
+- ✅ **Sentinel pattern fixed** — `double baseProbability = -1` → `double? baseProbability = null`
+- ✅ **Magic numbers fixed** — named constants in `ProbabilityDisplayHelper`
+- ⏳ **Debug.WriteLine** — still present in services; flag for pre-production cleanup
 
 ## Review Style
 - Raises findings as clear, actionable notes — never vague
