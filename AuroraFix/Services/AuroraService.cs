@@ -24,34 +24,44 @@ public class AuroraService
             var response = await _httpClient.GetStringAsync(KpIndexUrl);
             var jsonArray = JsonSerializer.Deserialize<JsonElement[]>(response);
 
-            if (jsonArray != null && jsonArray.Length > 0)
+            if (jsonArray == null || jsonArray.Length == 0) return 0;
+
+            // NOAA estimated_kp resets to near-zero at each 3-hour UTC window boundary
+            // (00:00, 03:00, 06:00 … 21:00 UTC) and accumulates fresh from that point.
+            // Taking the peak across the last 30 minutes spans any such boundary and
+            // avoids surfacing an artificially low reading when the previous window was active.
+            int windowSize = Math.Min(30, jsonArray.Length);
+            double peakKp = 0;
+            for (int i = jsonArray.Length - 1; i >= jsonArray.Length - windowSize; i--)
             {
-                // Walk backwards and return the first reading with a valid estimated_kp
-                for (int i = jsonArray.Length - 1; i >= 0; i--)
-                {
-                    if (jsonArray[i].TryGetProperty("estimated_kp", out var est))
-                    {
-                        double val = 0;
-                        try
-                        {
-                            val = est.GetDouble();
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"AuroraService: error parsing estimated_kp: {ex.Message}");
-                            continue;
-                        }
-                        if (val > 0) return val;
-                    }
-                }
+                double val = ReadKpFromEntry(jsonArray[i]);
+                if (val > peakKp) peakKp = val;
             }
-            return 0;
+
+            return peakKp;
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"AuroraService: error fetching Kp index: {ex.Message}");
             return 0;
         }
+    }
+
+    /// <summary>
+    /// Reads a Kp value from a NOAA JSON entry.
+    /// Prefers estimated_kp (decimal precision) and falls back to kp_index (integer).
+    /// </summary>
+    private static double ReadKpFromEntry(JsonElement entry)
+    {
+        if (entry.TryGetProperty("estimated_kp", out var est))
+        {
+            try { return est.GetDouble(); } catch { }
+        }
+        if (entry.TryGetProperty("kp_index", out var idx))
+        {
+            try { return idx.GetDouble(); } catch { }
+        }
+        return 0;
     }
 
     public async Task<IReadOnlyList<ForecastDay>> GetThreeDayForecastAsync(double latitude)
