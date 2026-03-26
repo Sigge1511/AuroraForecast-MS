@@ -12,6 +12,7 @@ How to decide who handles what.
 | Frontend and UX implementation | Selene | UI components, client state, UX polish |
 | UX design, review, and user experience | Calista | information hierarchy, message tone, edge case UX, accessibility |
 | Motion design, animations, and visual experience | Lyra | micro-interactions, transitions, loading states, error toast animation |
+| Performance profiling and optimization | Ember | startup time, API pipeline parallelism, memory usage, 60fps animations, Android perf |
 | Testing and quality verification | Nyx | test plans, unit/integration tests, regression checks |
 | DevOps and platform operations | Rowan | CI/CD, containers, infra config, deployment workflows |
 | Documentation and technical writing | Freya | developer docs, API docs, runbooks, release notes |

@@ -62,6 +62,13 @@
       "created_at": "2026-03-26T17:49:42Z",
       "legacy_named": false,
       "status": "active"
+    },
+    "ember": {
+      "persistent_name": "Ember",
+      "universe": "Custom Witch Coven",
+      "created_at": "2026-03-26T18:10:00Z",
+      "legacy_named": false,
+      "status": "active"
     }
   }
 }
