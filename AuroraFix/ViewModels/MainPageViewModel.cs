@@ -40,6 +40,9 @@ public partial class MainPageViewModel : BaseViewModel
 
         Title = "Aurora Forecast";
         ThreeDayForecast = new ObservableCollection<ForecastDay>();
+        ActivityDescription = "Enter a location above to check aurora conditions.";
+        StrokeDashValues = ProbabilityDisplayHelper.UpdateCircle(0);
+        IsDataLoaded = true;
     }
 
     // Called from MainPage.OnAppearing so startup exceptions are surfaced properly.
@@ -77,6 +80,7 @@ public partial class MainPageViewModel : BaseViewModel
         catch (Exception ex)
         {
             SetError($"Error fetching data: {ex.Message}");
+            IsDataLoaded = true;
             System.Diagnostics.Debug.WriteLine($"MainPageViewModel.SearchCityAsync error: {ex}");
         }
         finally
