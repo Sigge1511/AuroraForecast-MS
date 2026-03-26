@@ -50,6 +50,8 @@ The best of both worlds: machine precision meets human design. 🌌
 - 📅 3-day combined aurora + weather outlook
 - 🎯 Smart probability engine (latitude × Kp × weather)
 - 🧮 Animated probability display
+- ⚡ Parallel API pipeline — all data fetched simultaneously for fast results
+- 🛡️ Graceful error handling — clear overlay on failure, one tap to retry
 - 🗺️ Nordic city quick-picks: Östersund, Kiruna, Tromsø, Reykjavik, Stockholm, Oslo, Göteborg, Malmö
 - 🖥️ Cross-platform: Windows, Android, iOS, macOS
 
@@ -62,6 +64,8 @@ The aurora data in AuroraFix comes directly from **NOAA** — the National Ocean
 The key metric AuroraFix uses is the **Kp-index** — the *planetary geomagnetic disturbance index* — a 0–9 scale measuring how disturbed Earth's magnetic field is. A high Kp means solar wind is actively interacting with the magnetosphere. A Kp of 5 or above typically signals aurora visible at mid-latitudes. At 8–9, the lights can reach southern Europe and even parts of the US.
 
 Every forecast in AuroraFix is built on this live NOAA stream. No guessing. No delays. Just space weather, straight from the source.
+
+> **Reliability note:** NOAA's 1-minute Kp stream resets to near-zero at each 3-hour UTC boundary (00:00, 03:00, 06:00…). To avoid falsely low readings right after a boundary, AuroraFix always reports the **peak Kp over the last 30 minutes** — so a boundary reset never tanks your forecast.
 
 ---
 
@@ -139,9 +143,11 @@ flowchart TD
 **Step by step:**
 1. User searches for a city (e.g. "Tromsø")
 2. Geocoding service resolves it to GPS coordinates
-3. Two API calls fire in parallel:
-   - NOAA SWPC → current Kp-index + 3-day forecast
-   - Open-Meteo → cloud coverage + weather data
+3. Four API calls fire in parallel (`Task.WhenAll`):
+   - NOAA SWPC → current Kp-index (peak over last 30 min)
+   - NOAA SWPC → 3-day geomagnetic forecast
+   - Open-Meteo → current cloud coverage + weather
+   - Open-Meteo → 3-day hourly forecast
 4. Probability engine combines Kp, latitude, and cloud penalty
 5. Results are displayed with animated probability and forecast cards
 
@@ -161,14 +167,27 @@ All three APIs are completely free, open, and require no API keys.
 
 ## 📐 Probability Details
 
-### Latitude Bonus/Penalty
+### How the Base Probability Is Calculated
 
-| Latitude | Adjustment |
-|----------|------------|
-| Above 65°N | +20% (Arctic prime zone) |
-| 55–65°N | +10% (Northern Europe) |
-| 45–55°N | ±0% (baseline) |
-| Below 45°N | −20% (rare sightings only) |
+AuroraFix uses your latitude to determine the minimum Kp needed to see aurora overhead:
+
+```
+requiredKp = (67.0 − latitude) / 1.5
+```
+
+The further north you are, the lower the bar. Then the actual base probability scales with how much the live Kp *exceeds* that threshold:
+
+| Kp vs threshold | Base probability |
+|-----------------|-----------------|
+| Below threshold | 0–5% |
+| At threshold | ~10% |
+| +1 above | ~35% |
+| +2 above | ~60% |
+| +3 above | ~90% |
+
+**Example — Östersund, Sweden (63.2°N):**  
+`requiredKp = (67.0 − 63.2) / 1.5 ≈ 2.5`  
+At Kp 3.5 (diff +1), base probability ≈ 35%. At Kp 5 (diff +2.5), base ≈ 75%+.
 
 ---
 
