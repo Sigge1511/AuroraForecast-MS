@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 
 namespace AuroraFix.Helpers;
@@ -12,6 +13,25 @@ public static class ProbabilityDisplayHelper
     // Arc length of the full probability ring (816px circumference / 12 stroke-width units)
     private const double CircleArcUnits = 816.0 / 12.0;
 
+    // Cloud coverage thresholds (shared by AdjustForCloudCoverage and GetCloudImpactLabel)
+    private const double CloudClearThreshold   = 15.0;
+    private const double CloudPartlyThreshold  = 40.0;
+    private const double CloudMostlyThreshold  = 75.0;
+
+    // Probability curve constants for CalculateAuroraProbability
+    private const double ProbAtPlusWith3 = 90.0;   // Peak probability (kp ≥ requiredKp + 3)
+    private const double ProbAtPlusWith2 = 60.0;   // Base at kp = requiredKp + 2
+    private const double ProbAtPlusWith1 = 35.0;   // Base at kp = requiredKp + 1
+    private const double ProbAtThreshold = 10.0;   // Base at kp = requiredKp
+    private const double ProbAtMinusWith1 = 2.0;   // Base at kp = requiredKp - 1
+    private const double ProbSlopeHigh   = 30.0;   // Slope for diff ∈ [2, 3)
+    private const double ProbSlopeMid    = 25.0;   // Slope for diff ∈ [0, 2)
+    private const double ProbSlopeLow    = 8.0;    // Slope for diff ∈ [-1, 0)
+
+    // Cached DoubleCollection instances keyed on integer probability (0–100).
+    // UpdateCircle is called on every search/refresh — this eliminates per-call heap allocation.
+    private static readonly ConcurrentDictionary<int, DoubleCollection> _circleCache = new();
+
     /// <summary>
     /// Returns an aurora sighting probability (0–100) based on the current Kp index,
     /// the observer's latitude, and optional cloud cover percentage.
@@ -23,12 +43,12 @@ public static class ProbabilityDisplayHelper
 
         double baseProbability = diff switch
         {
-            >= 3.0 => 90,
-            >= 2.0 => 60 + (diff - 2.0) * 30,
-            >= 1.0 => 35 + (diff - 1.0) * 25,
-            >= 0.0 => 10 + diff * 25,
-            >= -1.0 => 2 + (diff + 1.0) * 8,
-            _ => 0
+            >= 3.0  => ProbAtPlusWith3,
+            >= 2.0  => ProbAtPlusWith2 + (diff - 2.0) * ProbSlopeHigh,
+            >= 1.0  => ProbAtPlusWith1 + (diff - 1.0) * ProbSlopeMid,
+            >= 0.0  => ProbAtThreshold + diff * ProbSlopeMid,
+            >= -1.0 => ProbAtMinusWith1 + (diff + 1.0) * ProbSlopeLow,
+            _       => 0
         };
 
         if (cloudCoverage > 0)
@@ -40,9 +60,12 @@ public static class ProbabilityDisplayHelper
     /// <summary>Returns the StrokeDashArray values for the probability ring arc.</summary>
     public static DoubleCollection UpdateCircle(double prob)
     {
-        double safeProb = Math.Max(0, Math.Min(100, prob));
-        double filledUnits = (safeProb / 100.0) * CircleArcUnits;
-        return new DoubleCollection { filledUnits, 100 };
+        int key = (int)Math.Max(0, Math.Min(100, prob));
+        return _circleCache.GetOrAdd(key, k =>
+        {
+            double filledUnits = (k / 100.0) * CircleArcUnits;
+            return new DoubleCollection { filledUnits, 100 };
+        });
     }
 
     /// <summary>Returns a short activity label based on Kp index value.</summary>
@@ -77,19 +100,19 @@ public static class ProbabilityDisplayHelper
     {
         double factor = cloudCoverage switch
         {
-            <= 15 => 1.0,   // Clear — no impact
-            <= 40 => 0.65,  // Partly cloudy — slight impact
-            <= 75 => 0.25,  // Mostly cloudy — significant impact
-            _ => 0.0        // Overcast — aurora fully blocked
+            <= CloudClearThreshold  => 1.0,   // Clear — no impact
+            <= CloudPartlyThreshold => 0.65,  // Partly cloudy — slight impact
+            <= CloudMostlyThreshold => 0.25,  // Mostly cloudy — significant impact
+            _                       => 0.0    // Overcast — aurora fully blocked
         };
         return baseProbability * factor;
     }
 
     public static string GetCloudImpactLabel(double cloudCoverage) => cloudCoverage switch
     {
-        <= 15 => "Clear skies",
-        <= 40 => "Partly cloudy",
-        <= 75 => "Mostly cloudy",
-        _ => "Overcast"
+        <= CloudClearThreshold  => "Clear skies",
+        <= CloudPartlyThreshold => "Partly cloudy",
+        <= CloudMostlyThreshold => "Mostly cloudy",
+        _                       => "Overcast"
     };
 }

@@ -1,6 +1,5 @@
 using AuroraFix.Models;
 using AuroraFix.Helpers;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.Json;
 
@@ -30,9 +29,9 @@ public class AuroraService
             // (00:00, 03:00, 06:00 … 21:00 UTC) and accumulates fresh from that point.
             // Taking the peak across the last 30 minutes spans any such boundary and
             // avoids surfacing an artificially low reading when the previous window was active.
-            int windowSize = Math.Min(30, jsonArray.Length);
+            int windowStart = Math.Max(0, jsonArray.Length - 30);
             double peakKp = 0;
-            for (int i = jsonArray.Length - 1; i >= jsonArray.Length - windowSize; i--)
+            for (int i = jsonArray.Length - 1; i >= windowStart; i--)
             {
                 double val = ReadKpFromEntry(jsonArray[i]);
                 if (val > peakKp) peakKp = val;
@@ -40,9 +39,8 @@ public class AuroraService
 
             return peakKp;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"AuroraService: error fetching Kp index: {ex.Message}");
             return 0;
         }
     }
@@ -53,14 +51,10 @@ public class AuroraService
     /// </summary>
     private static double ReadKpFromEntry(JsonElement entry)
     {
-        if (entry.TryGetProperty("estimated_kp", out var est))
-        {
-            try { return est.GetDouble(); } catch { }
-        }
-        if (entry.TryGetProperty("kp_index", out var idx))
-        {
-            try { return idx.GetDouble(); } catch { }
-        }
+        if (entry.TryGetProperty("estimated_kp", out var est) && est.TryGetDouble(out double kp))
+            return kp;
+        if (entry.TryGetProperty("kp_index", out var idx) && idx.TryGetDouble(out double kpIdx))
+            return kpIdx;
         return 0;
     }
 
@@ -120,9 +114,8 @@ public class AuroraService
 
             return forecasts.Count == 3 ? forecasts : GetFallbackForecast(latitude);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"AuroraService: error fetching 3-day forecast: {ex.Message}");
             return GetFallbackForecast(latitude);
         }
     }
@@ -158,13 +151,11 @@ public class AuroraService
         string dayPart,
         double latitude)
     {
-        if (!kpValues.Any())
-        {
-            System.Diagnostics.Debug.WriteLine("AuroraService: kpValues empty in AddForecastDay, skipping.");
-            return;
-        }
+        if (kpValues.Count == 0) return;
 
-        var avgKp = kpValues.Average();
+        double sum = 0;
+        foreach (var v in kpValues) sum += v;
+        var avgKp = sum / kpValues.Count;
         var prob = ProbabilityDisplayHelper.CalculateAuroraProbability(avgKp, latitude);
 
         forecasts.Add(new ForecastDay

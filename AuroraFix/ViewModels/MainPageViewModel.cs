@@ -72,8 +72,17 @@ public partial class MainPageViewModel : BaseViewModel
             if (location == null) return;
 
             UpdateLocationDisplay(location);
-            await UpdateCurrentAuroraAndWeatherAsync(location);
-            await UpdateThreeDayForecastWithWeatherAsync(location.Latitude, location.Longitude);
+
+            // Fire all 4 HTTP calls simultaneously — none depends on another at issue time.
+            var forecastTask = _auroraService.GetForecastForLocationAsync(location.CityName, location.Latitude, location.Longitude);
+            var weatherTask  = _weatherService.GetCurrentWeatherAsync(location.Latitude, location.Longitude);
+            var threeDayTask = _auroraService.GetThreeDayForecastAsync(location.Latitude);
+            var fourDayTask  = _weatherService.GetFourDayForecastAsync(location.Latitude, location.Longitude);
+
+            await Task.WhenAll(forecastTask, weatherTask, threeDayTask, fourDayTask);
+
+            ApplyCurrentAuroraAndWeather(location, forecastTask.Result, weatherTask.Result);
+            ApplyThreeDayForecastWithWeather(location.Latitude, threeDayTask.Result, fourDayTask.Result);
 
             IsDataLoaded = true;
         }
@@ -81,7 +90,6 @@ public partial class MainPageViewModel : BaseViewModel
         {
             SetError($"Error fetching data: {ex.Message}");
             IsDataLoaded = true;
-            System.Diagnostics.Debug.WriteLine($"MainPageViewModel.SearchCityAsync error: {ex}");
         }
         finally
         {
@@ -99,47 +107,32 @@ public partial class MainPageViewModel : BaseViewModel
 
     private void UpdateLocationDisplay(SelectedLocation location)
     {
-        if (location == null) return;
         LocationInfo = $"{location.CityName} ({location.Latitude:F2}°, {location.Longitude:F2}°)";
     }
 
-    private async Task UpdateCurrentAuroraAndWeatherAsync(SelectedLocation location)
+    private void ApplyCurrentAuroraAndWeather(SelectedLocation location, AuroraForecast forecast, Weather? weather)
     {
-        // KP
-        var forecast = await _auroraService.GetForecastForLocationAsync(
-            location.CityName, location.Latitude, location.Longitude);
         CurrentKpIndex = forecast.KpIndex;
-        // WEATHER
-        var weather = await _weatherService.GetCurrentWeatherAsync(location.Latitude, location.Longitude);
         var clouds = weather?.CloudCoverage ?? 0;
-        // CALC PROBABILITY
-        var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude, 0);
-        Probability = ProbabilityDisplayHelper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude, clouds);
-        // SET DISPLAY VALUES
+        var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude);
+        Probability = ProbabilityDisplayHelper.AdjustForCloudCoverage(baseProbability, clouds);
         CloudCoverage = clouds;
         CloudCondition = ProbabilityDisplayHelper.GetCloudImpactLabel(clouds);
         ActivityLevel = ProbabilityDisplayHelper.GetActivityLevelText(Probability);
         StrokeDashValues = ProbabilityDisplayHelper.UpdateCircle(Probability);
-        // TIME OF DAY
         bool isDark = !(weather?.IsDay ?? false);
         bool isMidnightSun = GuiMessageHelper.IsMidnightSun(weather?.Sunrise, weather?.Sunset, location.Latitude);
         DateTime? darkFrom = (!isDark && !isMidnightSun) ? weather?.Sunset : null;
-        // MESSAGE TO USER
         ActivityDescription = GuiMessageHelper.GetActivityDescription(
             Probability, CurrentKpIndex, clouds, baseProbability, isDark, darkFrom, isMidnightSun);
     }
 
-    private async Task UpdateThreeDayForecastWithWeatherAsync(double latitude, double longitude)
+    private void ApplyThreeDayForecastWithWeather(double latitude, IReadOnlyList<ForecastDay> auroraForecasts, List<Weather> weatherForecasts)
     {
-        var auroraForecasts = await _auroraService.GetThreeDayForecastAsync(latitude);
-        var weatherForecasts = await _weatherService.GetFourDayForecastAsync(latitude, longitude);
-
-        ThreeDayForecast.Clear();
-        // LOOP THROUGH FOLLOWING 3 DAYS
+        var newItems = new List<ForecastDay>(auroraForecasts.Count);
         foreach (var day in auroraForecasts)
         {
-            // MORE SIMPLE CALC & DISPLAY
-            var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(day.KpIndex, latitude, 0);
+            var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(day.KpIndex, latitude);
             var weather = weatherForecasts.FirstOrDefault(w => w.ForecastTime.Date == day.ForecastDate.Date);
 
             if (weather != null)
@@ -159,7 +152,8 @@ public partial class MainPageViewModel : BaseViewModel
                 day.IconEmoji = ProbabilityDisplayHelper.GetIconEmoji(baseProbability);
             }
 
-            ThreeDayForecast.Add(day);
+            newItems.Add(day);
         }
+        ThreeDayForecast = new ObservableCollection<ForecastDay>(newItems);
     }
 }
