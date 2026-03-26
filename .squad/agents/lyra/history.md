@@ -25,6 +25,61 @@
 
 ---
 
+### 2026-03-26 — Implementation: All Audit Findings Applied
+
+**Files changed:** `AuroraService.cs`, `MainPageViewModel.cs`, `ProbabilityDisplayHelper.cs`
+**Commit:** `889a4a9` — `perf: parallelise HTTP pipeline, batch ObservableCollection, remove allocations`
+
+#### What changed and before/after:
+
+**[CRITICAL] HTTP parallelism** (`MainPageViewModel.cs`)
+- Before: `UpdateCurrentAuroraAndWeatherAsync` awaited `GetForecastForLocationAsync`, then `GetCurrentWeatherAsync`; `UpdateThreeDayForecastWithWeatherAsync` awaited `GetThreeDayForecastAsync`, then `GetFourDayForecastAsync`. Both methods were themselves awaited sequentially — 4 serial HTTP round-trips.
+- After: `SearchCityAsync` fires all 4 tasks simultaneously (`forecastTask`, `weatherTask`, `threeDayTask`, `fourDayTask`) and awaits `Task.WhenAll`. On a 200ms mobile connection this collapses ~800ms of wait to ~200ms (the slowest single call).
+- The two old async methods were replaced by sync helpers `ApplyCurrentAuroraAndWeather` and `ApplyThreeDayForecastWithWeather` that accept pre-fetched results.
+
+**[MODERATE] ObservableCollection single assignment** (`MainPageViewModel.cs`)
+- Before: `ThreeDayForecast.Clear()` + `ThreeDayForecast.Add(day)` in a loop — 4 `CollectionChanged` events (1 clear + 3 adds), 3 layout/measure passes on Android.
+- After: build `List<ForecastDay>` locally, then `ThreeDayForecast = new ObservableCollection<ForecastDay>(newItems)` — fires exactly 1 `PropertyChanged`, 1 layout pass.
+
+**[MODERATE] NOAA JSON slice** (`AuroraService.cs`)
+- Before: `int windowSize = Math.Min(30, jsonArray.Length)` with loop bound `jsonArray.Length - windowSize`.
+- After: `int windowStart = Math.Max(0, jsonArray.Length - 30)` with loop bound `>= windowStart`. Semantically identical but matches the canonical audit pattern.
+
+**[MINOR] Redundant probability call** (`MainPageViewModel.cs`)
+- Before: `CalculateAuroraProbability(kp, lat, 0)` + `CalculateAuroraProbability(kp, lat, clouds)` — double computation, confusing intent.
+- After: `CalculateAuroraProbability(kp, lat)` once for `baseProbability`, then `Probability = AdjustForCloudCoverage(baseProbability, clouds)` — one call, explicit intent. Mathematically equivalent because `baseProbability ∈ [0,90]` so clamping in the second call is always a no-op.
+
+**[MINOR] LINQ removal in AddForecastDay** (`AuroraService.cs`)
+- Before: `kpValues.Any()` (enumerator alloc), `kpValues.Average()` (enumerator alloc).
+- After: `kpValues.Count == 0`, manual `foreach` sum + division. Zero allocations on the parse thread.
+
+**[MINOR] DoubleCollection cache in UpdateCircle** (`ProbabilityDisplayHelper.cs`)
+- Before: `new DoubleCollection { filledUnits, 100 }` on every call — heap alloc per search/refresh.
+- After: `ConcurrentDictionary<int, DoubleCollection>` keyed on `(int)prob` (0–100), lazy-populated via `GetOrAdd`. Max 101 instances ever created. `ConcurrentDictionary` chosen for thread safety.
+
+**[BONUS] ReadKpFromEntry TryGetDouble** (`AuroraService.cs`)
+- Before: `try { return est.GetDouble(); } catch { }` — exception-based control flow, silently swallows unexpected types.
+- After: `est.TryGetDouble(out double kp)` — branch on bool, zero-alloc, no exception machinery.
+
+**[BONUS] Remove Debug.WriteLines** (`AuroraService.cs`, `MainPageViewModel.cs`)
+- Removed all `System.Diagnostics.Debug.WriteLine` calls from `AuroraService` (3 sites) and `SearchCityAsync` (1 site). Also removed unused `using System.Collections.ObjectModel` from `AuroraService.cs`. Catch clauses rewritten as `catch (Exception)` where variable was only used for logging.
+
+**[BONUS] Dead null guard removed** (`MainPageViewModel.cs`)
+- `UpdateLocationDisplay` had `if (location == null) return;` — unreachable because the caller only calls it after a non-null check. Removed.
+
+**[BONUS] Cloud threshold constants** (`ProbabilityDisplayHelper.cs`)
+- Extracted `CloudClearThreshold = 15.0`, `CloudPartlyThreshold = 40.0`, `CloudMostlyThreshold = 75.0`. Applied in both `AdjustForCloudCoverage` and `GetCloudImpactLabel` — eliminates silent divergence risk flagged by River.
+
+**[BONUS] Probability curve constants** (`ProbabilityDisplayHelper.cs`)
+- Extracted `ProbAtPlusWith3`, `ProbAtPlusWith2`, `ProbAtPlusWith1`, `ProbAtThreshold`, `ProbAtMinusWith1`, `ProbSlopeHigh`, `ProbSlopeMid`, `ProbSlopeLow`. Named constants now document the curve intent.
+
+#### Gotchas:
+- `DoubleCollection` is a MAUI/WPF mutable list type — cached instances are returned directly. Safe because values are set once at construction and never mutated.
+- `catch (Exception)` (no variable) is valid C# — cleaner than `catch (Exception ex)` when the variable is only needed for logging that we're removing.
+- The `System.Collections.ObjectModel` using in `AuroraService.cs` was dead (leftover from earlier code) — removed safely.
+
+---
+
 ### 2026-03-26 — Audit: AuroraService / MainPageViewModel / ProbabilityDisplayHelper
 
 **Files audited:** `AuroraService.cs`, `MainPageViewModel.cs`, `ProbabilityDisplayHelper.cs`
