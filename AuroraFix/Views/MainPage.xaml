@@ -233,5 +233,41 @@
                                VerticalOptions="Center"
                                HorizontalOptions="Center" />
         </Grid>
+        <!--Error overlay-->
+        <Grid IsVisible="{Binding HasError}" BackgroundColor="{StaticResource LoadingOverlay}" ZIndex="10">
+            <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                <Border StrokeShape="RoundRectangle 25"
+                        BackgroundColor="{StaticResource CardBackground}"
+                        Padding="28"
+                        Stroke="Transparent"
+                        MaximumWidthRequest="320">
+                    <VerticalStackLayout Spacing="18" HorizontalOptions="Center">
+                        <Label Text="!"
+                               FontSize="32"
+                               TextColor="{StaticResource AuroraTeal}"
+                               FontFamily="MontserratBold"
+                               HorizontalOptions="Center"/>
+                        <Label Text="{Binding ErrorMessage}"
+                               FontSize="{StaticResource FontSizeBodyLarge}"
+                               TextColor="White"
+                               FontFamily="Montserrat"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap"
+                               LineHeight="1.2"/>
+                        <Button Text="OK"
+                                Command="{Binding DismissErrorCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource AuroraTeal}"
+                                FontFamily="MontserratBold"
+                                BorderColor="{StaticResource AuroraTeal}"
+                                BorderWidth="2"
+                                CornerRadius="25"
+                                Padding="0,10"
+                                HorizontalOptions="Fill"
+                                Margin="0,10,0,0"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </ContentPage>

@@ -95,30 +95,32 @@ public partial class MainPageViewModel : BaseViewModel
 
     private void UpdateLocationDisplay(SelectedLocation location)
     {
+        if (location == null) return;
         LocationInfo = $"{location.CityName} ({location.Latitude:F2}°, {location.Longitude:F2}°)";
     }
 
     private async Task UpdateCurrentAuroraAndWeatherAsync(SelectedLocation location)
     {
+        // KP
         var forecast = await _auroraService.GetForecastForLocationAsync(
             location.CityName, location.Latitude, location.Longitude);
         CurrentKpIndex = forecast.KpIndex;
-
+        // WEATHER
         var weather = await _weatherService.GetCurrentWeatherAsync(location.Latitude, location.Longitude);
         var clouds = weather?.CloudCoverage ?? 0;
-
+        // CALC PROBABILITY
         var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude, 0);
         Probability = ProbabilityDisplayHelper.CalculateAuroraProbability(CurrentKpIndex, location.Latitude, clouds);
-
+        // SET DISPLAY VALUES
         CloudCoverage = clouds;
         CloudCondition = ProbabilityDisplayHelper.GetCloudImpactLabel(clouds);
         ActivityLevel = ProbabilityDisplayHelper.GetActivityLevelText(Probability);
         StrokeDashValues = ProbabilityDisplayHelper.UpdateCircle(Probability);
-
+        // TIME OF DAY
         bool isDark = !(weather?.IsDay ?? false);
         bool isMidnightSun = GuiMessageHelper.IsMidnightSun(weather?.Sunrise, weather?.Sunset, location.Latitude);
         DateTime? darkFrom = (!isDark && !isMidnightSun) ? weather?.Sunset : null;
-
+        // MESSAGE TO USER
         ActivityDescription = GuiMessageHelper.GetActivityDescription(
             Probability, CurrentKpIndex, clouds, baseProbability, isDark, darkFrom, isMidnightSun);
     }
@@ -129,9 +131,10 @@ public partial class MainPageViewModel : BaseViewModel
         var weatherForecasts = await _weatherService.GetFourDayForecastAsync(latitude, longitude);
 
         ThreeDayForecast.Clear();
-
+        // LOOP THROUGH FOLLOWING 3 DAYS
         foreach (var day in auroraForecasts)
         {
+            // MORE SIMPLE CALC & DISPLAY
             var baseProbability = ProbabilityDisplayHelper.CalculateAuroraProbability(day.KpIndex, latitude, 0);
             var weather = weatherForecasts.FirstOrDefault(w => w.ForecastTime.Date == day.ForecastDate.Date);
 

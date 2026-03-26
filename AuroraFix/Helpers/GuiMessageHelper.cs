@@ -25,7 +25,16 @@ public static class GuiMessageHelper
             if (isMidnightSun)
                 return "No darkness at your location this time of year — the midnight sun rules the sky. Come back in autumn when the nights return!";
 
-            var darkTime = darkFrom.HasValue ? $" around {darkFrom.Value:HH:mm}" : " later tonight";
+            string darkTime;
+            try
+            {
+                darkTime = darkFrom.HasValue ? $" around {darkFrom.Value:HH:mm}" : " later tonight";
+            }
+            catch (Exception ex)
+            {
+                darkTime = " later tonight";
+                System.Diagnostics.Debug.WriteLine($"GuiMessageHelper: Failed to format darkFrom: {ex.Message}");
+            }
             return probability switch
             {
                 > 50 => $"The aurora is looking active — but it is still daylight at your location. Darkness falls{darkTime}. Set a reminder and check back then!",

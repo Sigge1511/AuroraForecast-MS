@@ -39,7 +39,8 @@ public static class ProbabilityDisplayHelper
     /// <summary>Returns the StrokeDashArray values for the probability ring arc.</summary>
     public static DoubleCollection UpdateCircle(double prob)
     {
-        double filledUnits = (prob / 100.0) * CircleArcUnits;
+        double safeProb = Math.Max(0, Math.Min(100, prob));
+        double filledUnits = (safeProb / 100.0) * CircleArcUnits;
         return new DoubleCollection { filledUnits, 100 };
     }
 

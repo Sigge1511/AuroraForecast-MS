@@ -31,7 +31,16 @@ public class AuroraService
                 {
                     if (jsonArray[i].TryGetProperty("estimated_kp", out var est))
                     {
-                        var val = est.GetDouble();
+                        double val = 0;
+                        try
+                        {
+                            val = est.GetDouble();
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"AuroraService: error parsing estimated_kp: {ex.Message}");
+                            continue;
+                        }
                         if (val > 0) return val;
                     }
                 }
@@ -139,7 +148,11 @@ public class AuroraService
         string dayPart,
         double latitude)
     {
-        if (!kpValues.Any()) return;
+        if (!kpValues.Any())
+        {
+            System.Diagnostics.Debug.WriteLine("AuroraService: kpValues empty in AddForecastDay, skipping.");
+            return;
+        }
 
         var avgKp = kpValues.Average();
         var prob = ProbabilityDisplayHelper.CalculateAuroraProbability(avgKp, latitude);

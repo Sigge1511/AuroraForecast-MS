@@ -92,14 +92,26 @@ public class WeatherService
             if (!json.TryGetProperty("daily", out var daily))
                 return forecasts;
 
-            var times = daily.GetProperty("time").EnumerateArray().ToList();
-            var cloudCovers = daily.GetProperty("cloud_cover_mean").EnumerateArray().ToList();
+            var times = new List<JsonElement>();
+            var cloudCovers = new List<JsonElement>();
+            if (daily.TryGetProperty("time", out var timeArr))
+                times = timeArr.EnumerateArray().ToList();
+            if (daily.TryGetProperty("cloud_cover_mean", out var cloudArr))
+                cloudCovers = cloudArr.EnumerateArray().ToList();
             daily.TryGetProperty("sunrise", out var sunriseArr);
             daily.TryGetProperty("sunset", out var sunsetArr);
 
-            for (int i = 0; i < Math.Min(4, cloudCovers.Count); i++)
+            for (int i = 0; i < Math.Min(4, Math.Min(cloudCovers.Count, times.Count)); i++)
             {
-                var cloudCover = cloudCovers[i].GetDouble();
+                double cloudCover = 0;
+                try
+                {
+                    cloudCover = cloudCovers[i].GetDouble();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"WeatherService: error parsing cloud_cover_mean: {ex.Message}");
+                }
                 DateTime? sunrise = null, sunset = null;
 
                 if (sunriseArr.ValueKind != JsonValueKind.Undefined && i < sunriseArr.GetArrayLength())
@@ -107,9 +119,15 @@ public class WeatherService
                 if (sunsetArr.ValueKind != JsonValueKind.Undefined && i < sunsetArr.GetArrayLength())
                     if (DateTime.TryParse(sunsetArr[i].GetString(), out var ss)) sunset = ss;
 
+                DateTime forecastTime = DateTime.MinValue;
+                if (times[i].ValueKind == JsonValueKind.String && DateTime.TryParse(times[i].GetString(), out var ft))
+                    forecastTime = ft;
+                else
+                    System.Diagnostics.Debug.WriteLine($"WeatherService: error parsing forecast time at index {i}");
+
                 forecasts.Add(new Weather
                 {
-                    ForecastTime = DateTime.Parse(times[i].GetString()!),
+                    ForecastTime = forecastTime,
                     CloudCoverage = cloudCover,
                     WeatherDescription = GetWeatherDescription(cloudCover),
                     Sunrise = sunrise,
