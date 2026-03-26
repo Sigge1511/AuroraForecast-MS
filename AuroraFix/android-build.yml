@@ -1,0 +1,51 @@
+name: Build and Release Android APK
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5# Uppdaterad till v5!
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      - name: Restore
+        run: dotnet restore AuroraFix/AuroraForecast.csproj
+
+      - name: Publish APK
+        run: dotnet publish AuroraFix/AuroraForecast.csproj -f net10.0-android -c Release -p:AndroidPackageFormat=apk -o ./publish
+
+      - name: Upload Artifact (Internal GH)
+        uses: actions/upload-artifact@v4 
+        with:
+          name: android-apk
+          path: ./publish/*.apk
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./publish/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
