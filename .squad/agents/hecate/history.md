@@ -69,6 +69,24 @@
 
 **Outcome:**
 Both services now handle all I/O, parsing, and LINQ operations robustly, logging errors and returning safe fallbacks as required by conventions.
+### 2026-MM-DD: GPS-first geolocation fix — real-device failure (Issue #9 follow-up)
+
+**Problem:**
+- `ip-api.com` free tier does not support HTTPS. On real Android hardware, the HTTPS call silently failed and returned null. Geolocation never worked on physical devices.
+- 3-second `CancellationTokenSource` timeout was too aggressive for real mobile networks.
+
+**Files modified:**
+- `AuroraFix/Platforms/Android/AndroidManifest.xml` — added `ACCESS_FINE_LOCATION` and `ACCESS_COARSE_LOCATION` permissions.
+- `AuroraFix/Services/IpGeolocationService.cs` — switched to `ipapi.co/json/` (HTTPS, free, no key); updated JSON property names (`latitude`, `longitude`, `country_name`, `region`); removed `status` field check; added `error` field guard; raised timeout to 8s.
+- `AuroraFix/ViewModels/MainPageViewModel.cs` — replaced IP-only approach with GPS-first (`Geolocation` + `Geocoding`) then IP fallback. Added `Microsoft.Maui.Devices.Sensors` using.
+
+**Learnings:**
+- Always verify HTTPS support when choosing a free geolocation API — ip-api.com HTTP-only is a silent failure on Android (no cleartext policy).
+- GPS `GetLastKnownLocationAsync()` is fast and should always be tried first — avoids the network round-trip if a cached fix exists.
+- `Permissions.RequestAsync<LocationWhenInUse>()` must be called at runtime on Android 6+ even if manifest permissions are declared.
+- `ipapi.co` returns `{"error": true, "reason": "..."}` for bad IPs — the `error` boolean must be checked before treating the response as valid.
+- Timeout should be at least 8s on mobile networks; 3s causes frequent false failures.
+
 ### 2026-03-21: Unicode/Swedish city search bug investigation & fix
 
 **What was broken:**
