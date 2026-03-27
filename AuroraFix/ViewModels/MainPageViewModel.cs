@@ -23,8 +23,8 @@ public partial class MainPageViewModel : BaseViewModel
     [ObservableProperty] private double probability;
     [ObservableProperty] private string locationInfo = string.Empty;
     [ObservableProperty] private bool isDataLoaded;
-    [ObservableProperty] private ObservableCollection<ForecastDay> threeDayForecast;
-    [ObservableProperty] private DoubleCollection strokeDashValues;
+    [ObservableProperty] private ObservableCollection<ForecastDay> threeDayForecast = [];
+    [ObservableProperty] private DoubleCollection strokeDashValues = [];
 
     [RelayCommand]
     private async Task RefreshAsync() => await SearchCityAsync();

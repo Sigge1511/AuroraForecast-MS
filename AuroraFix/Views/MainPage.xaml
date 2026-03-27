@@ -13,6 +13,8 @@
                Aspect="AspectFill"
                Opacity="0.5"
                IsAnimationPlaying="True" />
+
+        <!--Gradient overlay-->
         <BoxView>
             <BoxView.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -29,7 +31,7 @@
 
                 <!--App title-->
                 <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                    <Label Text="AURORA FORECAST"
+                    <Label Text="AURORA CATCHER"
                            CharacterSpacing="6"
                            FontSize="{StaticResource FontSizeAppTitle}"
                            TextColor="{StaticResource AuroraTeal}"
@@ -67,17 +69,18 @@
                 </Grid>
 
                 <!--Probability ring-->
-                <Grid HeightRequest="300" WidthRequest="300"
+                <!--Grid 360×360; arc center = (180, 30+150) = (180,180) = grid center-->
+                <Grid HeightRequest="360" WidthRequest="360"
                       HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}"
-                      Margin="0,0,0,-30">
+                      Margin="0,0,0,-45">
                     <Path Stroke="#20FFFFFF"
                           StrokeThickness="12"
                           StrokeLineCap="Round">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="140,10">
-                                    <ArcSegment Point="139.9,10"
-                                                Size="130,130"
+                                <PathFigure StartPoint="180,30">
+                                    <ArcSegment Point="179.9,30"
+                                                Size="150,150"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
                                 </PathFigure>
@@ -90,9 +93,9 @@
                           StrokeDashArray="{Binding StrokeDashValues}">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="140,10">
-                                    <ArcSegment Point="139.9,10"
-                                                Size="130,130"
+                                <PathFigure StartPoint="180,30">
+                                    <ArcSegment Point="179.9,30"
+                                                Size="150,150"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
                                 </PathFigure>
@@ -102,7 +105,7 @@
 
                     <VerticalStackLayout VerticalOptions="Center"
                                          HorizontalOptions="Center"
-                                         Margin="-10,3,0,0">
+                                         TranslationY="15">
                         <Label Text="PROBABILITY"
                                FontSize="{StaticResource FontSizeLabel}"
                                TextColor="{StaticResource TextSubtle}"
@@ -122,14 +125,14 @@
                                FontSize="{StaticResource FontSizeActivityLevel}"
                                HorizontalOptions="Center"
                                TextColor="{StaticResource AuroraTeal}"
-                               Margin="0,-20,0,0"/>
+                               Margin="0,-25,0,0"/>
                         <Label Text="KP INDEX: "
-                               FontSize="{StaticResource FontSizeLabel}"
+                               FontSize="19"
                                HorizontalOptions="Center"
                                TextColor="Gray"
-                               Margin="0,5,0,0"/>
+                               Margin="0,16,0,0"/>
                         <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}"
-                               FontSize="{StaticResource FontSizeLabel}"
+                               FontSize="21"
                                HorizontalOptions="Center"
                                TextColor="{StaticResource AuroraTeal}"/>
                     </VerticalStackLayout>
@@ -167,12 +170,14 @@
                            FontFamily="MontserratBold"/>
 
                     <CollectionView ItemsSource="{Binding ThreeDayForecast}"
-                                    >
+                                    SelectionMode="None"
+                                    BackgroundColor="Transparent">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid ColumnDefinitions="50, *, Auto"
                                       RowDefinitions="Auto, 1"
-                                      Padding="10,20">
+                                      Padding="10,20"
+                                      BackgroundColor="Transparent">
                                     <Label Text="{Binding IconEmoji}"
                                            FontSize="{StaticResource FontSizeForecastIcon}"
                                            VerticalOptions="Center" />
