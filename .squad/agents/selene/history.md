@@ -37,6 +37,28 @@
 
 ## Learnings
 
+### 2026-03-28: GIF shake fix v2 — native Android window background
+
+**Problem:** The AbsoluteLayout wrapper from v1 was insufficient — shake persisted because even though layout cascading was reduced, MAUI still processed invalidate() calls from the GIF's animated drawable.
+
+**Root cause (deeper):** Even inside an AbsoluteLayout with proportional bounds, MAUI's `AnimatedDrawable` on Android calls `invalidateSelf()` which propagates through MAUI's internal `InvalidateDrawable` callback chain. The AbsoluteLayout absorbs `InvalidateMeasure` but not `InvalidateDraw` — so repaint cycles still run on the MAUI compositor at GIF framerate, causing jitter.
+
+**Real fix:** Move the GIF completely out of MAUI. Render it as the Android Activity `Window.SetBackgroundDrawable()`. Animation frames call `invalidate()` only on the Window's decor-view background — a native Android layer that is entirely below MAUI's SurfaceView. MAUI layout and draw are never touched.
+
+**Implementation:**
+- Moved `giphy.gif` from `Resources/Images/` (MauiImage) → `Resources/Raw/` (MauiAsset) so it's in Android assets and accessible via `Assets.Open("giphy.gif")`
+- `MainActivity.OnCreate` reads the GIF bytes, wraps in `Java.Nio.ByteBuffer`, decodes via `Android.Graphics.ImageDecoder.CreateSource(ByteBuffer)` + `DecodeDrawable()` → casts to `AnimatedImageDrawable` (all API 28+)
+- Sets `Alpha = 127` (50% opacity) and calls `Start()`
+- Sets as window background via `Window.SetBackgroundDrawable()`
+- API < 28 guard: `OperatingSystem.IsAndroidVersionAtLeast(28)` + try/catch → graceful dark fallback
+- Removed `<AbsoluteLayout>` + `<Image Source="giphy.gif">` from MainPage.xaml
+- Set `ContentPage BackgroundColor="Transparent"` and root `Grid BackgroundColor="Transparent"` so the native window GIF shows through
+- Kept the `BoxView` `LinearGradientBrush` overlay intact — it still provides the top/bottom dark fade
+
+**`ImageDecoder` namespace:** It's `Android.Graphics.ImageDecoder`, NOT `Android.Graphics.Drawables.ImageDecoder`. `AnimatedImageDrawable` is in `Android.Graphics.Drawables`.
+
+**Key lesson:** `AbsoluteLayout` absorbs `InvalidateMeasure` propagation but NOT `InvalidateDraw`. For a true zero-shake animated background on Android, the drawable must live outside MAUI's view hierarchy entirely — at the Window background level. Use `Activity.Window.SetBackgroundDrawable(animatedImageDrawable)` from `OnCreate`.
+
 ### 2026-03-28: UI fixes and rebrand
 
 - Fixed GIF-induced micro-shaking by wrapping giphy.gif in AbsoluteLayout (absorbs per-frame invalidations locally)
