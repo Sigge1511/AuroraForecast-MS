@@ -2,6 +2,8 @@ namespace AuroraFix.Views;
 
 public partial class MainPage : ContentPage
 {
+    private bool _locationInitialized;
+
     public MainPage(ViewModels.MainPageViewModel viewModel)
     {
         InitializeComponent();
@@ -11,8 +13,9 @@ public partial class MainPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (BindingContext is ViewModels.MainPageViewModel vm && !vm.IsDataLoaded)
+        if (!_locationInitialized && BindingContext is ViewModels.MainPageViewModel vm)
         {
+            _locationInitialized = true;
             try
             {
                 await vm.InitializeAsync();
