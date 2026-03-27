@@ -33,6 +33,7 @@ namespace AuroraFix
             builder.Services.AddSingleton<AuroraService>();
             builder.Services.AddSingleton<GeocodingService>();
             builder.Services.AddSingleton<WeatherService>();
+            builder.Services.AddSingleton<IpGeolocationService>();
 
             // Register ViewModels
             builder.Services.AddTransient<MainPageViewModel>();

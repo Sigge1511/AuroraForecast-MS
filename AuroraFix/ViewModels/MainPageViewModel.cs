@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using AuroraFix.Models;
 using AuroraFix.Services;
 using AuroraFix.Helpers;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace AuroraFix.ViewModels;
@@ -13,6 +14,7 @@ public partial class MainPageViewModel : BaseViewModel
     private readonly AuroraService _auroraService;
     private readonly GeocodingService _geocodingService;
     private readonly WeatherService _weatherService;
+    private readonly IpGeolocationService _ipGeolocationService;
 
     [ObservableProperty] private string cityName = string.Empty;
     [ObservableProperty] private double currentKpIndex;
@@ -32,11 +34,13 @@ public partial class MainPageViewModel : BaseViewModel
     public MainPageViewModel(
         AuroraService auroraService,
         GeocodingService geocodingService,
-        WeatherService weatherService)
+        WeatherService weatherService,
+        IpGeolocationService ipGeolocationService)
     {
         _auroraService = auroraService;
         _geocodingService = geocodingService;
         _weatherService = weatherService;
+        _ipGeolocationService = ipGeolocationService;
 
         Title = "Aurora Forecast";
         ThreeDayForecast = new ObservableCollection<ForecastDay>();
@@ -46,10 +50,33 @@ public partial class MainPageViewModel : BaseViewModel
     }
 
     // Called from MainPage.OnAppearing so startup exceptions are surfaced properly.
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
-        CityName = "Östersund";
-        await SearchCityAsync();
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var location = await _ipGeolocationService.GetLocationFromIpAsync();
+                if (location != null && !string.IsNullOrWhiteSpace(location.City))
+                {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        // Guard against overwriting a search the user has already started
+                        if (string.IsNullOrWhiteSpace(CityName) && !IsBusy)
+                        {
+                            CityName = location.City;
+                            SearchCityCommand.Execute(null);
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[IpGeolocation] Startup lookup failed: {ex.Message}");
+            }
+        });
+
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
