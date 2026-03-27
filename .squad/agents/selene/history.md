@@ -37,6 +37,14 @@
 
 ## Learnings
 
+### 2026-03-28: UI fixes and rebrand
+
+- Fixed GIF-induced micro-shaking by wrapping giphy.gif in AbsoluteLayout (absorbs per-frame invalidations locally)
+- Bumped KP INDEX label FontSize 18→21, top margin 18→26; Kp value label FontSize 18→21
+- Renamed GUI header "AURORA FORECAST" → "AURORA CATCHER" in MainPage.xaml
+- All work committed and pushed to squad/10-gui-improvements
+
+
 ### 2026-03-28: App renamed from "Aurora Forecast" to "Aurora Catcher" in UI
 
 **Task:** Rename the visible app title in the GUI.
