@@ -50,35 +50,25 @@ public partial class MainPageViewModel : BaseViewModel
         IsDataLoaded = true;
     }
 
-    // Called from MainPage.OnAppearing so startup exceptions are surfaced properly.
-    public Task InitializeAsync()
+    // Called from MainPage.OnAppearing (main thread) — do NOT wrap in Task.Run,
+    // as Permissions.RequestAsync must be called from the main thread on Android.
+    public async Task InitializeAsync()
     {
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                string? city = await TryGetCityFromGpsAsync();
-                city ??= await TryGetCityFromIpAsync();
+            string? city = await TryGetCityFromGpsAsync();
+            city ??= await TryGetCityFromIpAsync();
 
-                if (!string.IsNullOrWhiteSpace(city))
-                {
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        if (string.IsNullOrWhiteSpace(CityName) && !IsBusy)
-                        {
-                            CityName = city;
-                            SearchCityCommand.Execute(null);
-                        }
-                    });
-                }
-            }
-            catch (Exception ex)
+            if (!string.IsNullOrWhiteSpace(city) && string.IsNullOrWhiteSpace(CityName))
             {
-                System.Diagnostics.Debug.WriteLine($"[LocationDetection] Startup lookup failed: {ex.Message}");
+                CityName = city;
+                await SearchCityAsync();
             }
-        });
-
-        return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LocationDetection] Startup lookup failed: {ex.Message}");
+        }
     }
 
     private static async Task<string?> TryGetCityFromGpsAsync()
