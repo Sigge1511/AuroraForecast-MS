@@ -6,6 +6,7 @@ using AuroraFix.Services;
 using AuroraFix.Helpers;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace AuroraFix.ViewModels;
 
@@ -56,15 +57,16 @@ public partial class MainPageViewModel : BaseViewModel
         {
             try
             {
-                var location = await _ipGeolocationService.GetLocationFromIpAsync();
-                if (location != null && !string.IsNullOrWhiteSpace(location.City))
+                string? city = await TryGetCityFromGpsAsync();
+                city ??= await TryGetCityFromIpAsync();
+
+                if (!string.IsNullOrWhiteSpace(city))
                 {
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        // Guard against overwriting a search the user has already started
                         if (string.IsNullOrWhiteSpace(CityName) && !IsBusy)
                         {
-                            CityName = location.City;
+                            CityName = city;
                             SearchCityCommand.Execute(null);
                         }
                     });
@@ -72,11 +74,52 @@ public partial class MainPageViewModel : BaseViewModel
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[IpGeolocation] Startup lookup failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[LocationDetection] Startup lookup failed: {ex.Message}");
             }
         });
 
         return Task.CompletedTask;
+    }
+
+    private static async Task<string?> TryGetCityFromGpsAsync()
+    {
+        try
+        {
+            var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            if (status != PermissionStatus.Granted)
+                return null;
+
+            var cachedLocation = await Geolocation.GetLastKnownLocationAsync();
+            var gpsLocation = cachedLocation
+                ?? await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Low, TimeSpan.FromSeconds(8)));
+
+            if (gpsLocation == null) return null;
+
+            var placemarks = await Geocoding.GetPlacemarksAsync(gpsLocation.Latitude, gpsLocation.Longitude);
+            var city = placemarks?.FirstOrDefault()?.Locality;
+            System.Diagnostics.Debug.WriteLine($"[LocationDetection] GPS city: {city}");
+            return string.IsNullOrWhiteSpace(city) ? null : city;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LocationDetection] GPS failed: {ex.Message}");
+            return null;
+        }
+    }
+
+    private async Task<string?> TryGetCityFromIpAsync()
+    {
+        try
+        {
+            var result = await _ipGeolocationService.GetLocationFromIpAsync();
+            System.Diagnostics.Debug.WriteLine($"[LocationDetection] IP city: {result?.City}");
+            return string.IsNullOrWhiteSpace(result?.City) ? null : result.City;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LocationDetection] IP fallback failed: {ex.Message}");
+            return null;
+        }
     }
 
     [RelayCommand]
