@@ -127,10 +127,10 @@
                                TextColor="{StaticResource AuroraTeal}"
                                Margin="0,-30,0,0"/>
                         <Label Text="KP INDEX: "
-                               FontSize="21"
+                               FontSize="19"
                                HorizontalOptions="Center"
                                TextColor="Gray"
-                               Margin="0,14,0,0"/>
+                               Margin="0,16,0,0"/>
                         <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}"
                                FontSize="21"
                                HorizontalOptions="Center"
