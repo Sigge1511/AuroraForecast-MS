@@ -44,6 +44,7 @@ The best of both worlds: machine precision meets human design. 🌌
 
 ## ✨ Features
 
+- 📍 **Auto-location on launch** — detects your city automatically via GPS (with permission) or IP fallback
 - 🌍 Search any city worldwide for real-time aurora forecasts
 - 📊 Live Kp-index data straight from NOAA's Space Weather Prediction Center
 - ☁️ Cloud coverage integration via Open-Meteo
@@ -115,7 +116,7 @@ Aurora Forecast is built with a clean MVVM separation of concerns. Each layer do
 ```mermaid
 flowchart TD
     A["⚛️ VIEW\nXAML + ViewModel\nDisplays data · Handles interaction"]
-    B["⚙️ SERVICES\nAuroraService → NOAA API\nWeatherService → Open-Meteo\nGeocodingService → OSM Nominatim"]
+    B["⚙️ SERVICES\nAuroraService → NOAA API\nWeatherService → Open-Meteo\nGeocodingService → OSM Nominatim\nIpGeolocationService → ipapi.co"]
     C["🧮 HELPERS\nProbabilityDisplayHelper\nAurora probability calc · Cloud adjustment"]
     D["📦 MODELS\nAuroraForecast · Weather · ForecastDay\nPure data — no logic"]
 
@@ -130,7 +131,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["🌍 User searches city"] --> B["📍 Geocoding\n(OSM Nominatim)"]
+    Z["📱 App launches"] --> Z1{"GPS permission?"}
+    Z1 -->|Granted| Z2["📡 Device GPS\n+ reverse geocode"]
+    Z1 -->|Denied/unavailable| Z3["🌐 IP geolocation\n(ipapi.co)"]
+    Z2 --> A
+    Z3 --> A
+    A["🌍 City resolved"] --> B["📍 Geocoding\n(OSM Nominatim)"]
     B --> C["🗺️ Coordinates resolved"]
     C --> D{{"⚡ Parallel API fetch"}}
     D --> E["📡 NOAA SWPC\nKp-index + forecast"]
@@ -141,8 +147,8 @@ flowchart TD
 ```
 
 **Step by step:**
-1. User searches for a city (e.g. "Tromsø")
-2. Geocoding service resolves it to GPS coordinates
+1. On launch, the app auto-detects your city — GPS-first (requests `LocationWhenInUse` permission), falls back to IP geolocation via `ipapi.co` if GPS is unavailable or denied
+2. City name is resolved to GPS coordinates via Geocoding (OSM Nominatim)
 3. Four API calls fire in parallel (`Task.WhenAll`):
    - NOAA SWPC → current Kp-index (peak over last 30 min)
    - NOAA SWPC → 3-day geomagnetic forecast
@@ -150,18 +156,20 @@ flowchart TD
    - Open-Meteo → 3-day hourly forecast
 4. Probability engine combines Kp, latitude, and cloud penalty
 5. Results are displayed with animated probability and forecast cards
+6. User can also search any city manually at any time
 
 ---
 
 ## 🌐 APIs
 
-All three APIs are completely free, open, and require no API keys.
+All APIs are completely free, open, and require no API keys.
 
 | Service | Provider | Purpose |
 |---------|----------|---------|
 | ☀️ Aurora & Kp data | [NOAA SWPC](https://www.swpc.noaa.gov/) | Real-time space weather, Kp-index, 3-day forecasts |
 | ☁️ Weather & clouds | [Open-Meteo](https://open-meteo.com/) | Cloud coverage, hourly + daily weather |
 | 📍 Geocoding | [OpenStreetMap Nominatim](https://nominatim.org/) | City name → GPS coordinates |
+| 🌐 IP geolocation | [ipapi.co](https://ipapi.co/) | Auto-detect city from IP when GPS is unavailable |
 
 ---
 
@@ -238,7 +246,7 @@ git clone https://github.com/Sigge1511/AuroraForecast-MS
 ---
 
 <p align="center">
-  <b>© 2025 Sigge1511</b> — please don't steal my aurora 🌌
+  <b>© 2026 Sigge1511</b> — please don't steal my aurora 🌌
 </p>
 
 <p align="center">
