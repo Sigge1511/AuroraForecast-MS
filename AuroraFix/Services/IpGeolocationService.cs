@@ -6,15 +6,14 @@ namespace AuroraFix.Services;
 public class IpGeolocationService
 {
     private readonly HttpClient _httpClient;
-    private const string IpApiUrl = "https://ip-api.com/json/";
-    private const string StatusSuccess = "success";
-    private const int TimeoutSeconds = 3;
-    private const string PropStatus = "status";
+    private const string IpApiUrl = "https://ipapi.co/json/";
+    private const int TimeoutSeconds = 8;
     private const string PropCity = "city";
-    private const string PropLat = "lat";
-    private const string PropLon = "lon";
-    private const string PropCountry = "country";
-    private const string PropRegion = "regionName";
+    private const string PropLat = "latitude";
+    private const string PropLon = "longitude";
+    private const string PropCountry = "country_name";
+    private const string PropRegion = "region";
+    private const string PropError = "error";
 
     public IpGeolocationService()
     {
@@ -30,11 +29,18 @@ public class IpGeolocationService
             using var doc = JsonDocument.Parse(response);
             var root = doc.RootElement;
 
-            if (root.TryGetProperty(PropStatus, out var status) && status.GetString() == StatusSuccess)
+            if (root.TryGetProperty(PropError, out var error) && error.ValueKind == JsonValueKind.True)
+            {
+                System.Diagnostics.Debug.WriteLine("[IpGeolocation] API returned error response");
+                return null;
+            }
+
+            var city = root.TryGetProperty(PropCity, out var cityProp) ? cityProp.GetString() : null;
+            if (!string.IsNullOrWhiteSpace(city))
             {
                 return new IpGeolocationResult
                 {
-                    City      = root.TryGetProperty(PropCity,    out var city)    ? city.GetString()    ?? string.Empty : string.Empty,
+                    City      = city,
                     Latitude  = root.TryGetProperty(PropLat,     out var lat)     ? lat.GetDouble()     : 0,
                     Longitude = root.TryGetProperty(PropLon,     out var lon)     ? lon.GetDouble()     : 0,
                     Country   = root.TryGetProperty(PropCountry, out var country) ? country.GetString() ?? string.Empty : string.Empty,
@@ -42,7 +48,7 @@ public class IpGeolocationService
                 };
             }
 
-            System.Diagnostics.Debug.WriteLine("[IpGeolocation] API returned non-success status");
+            System.Diagnostics.Debug.WriteLine("[IpGeolocation] API returned empty city");
         }
         catch (Exception ex)
         {
