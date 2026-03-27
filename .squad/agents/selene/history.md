@@ -37,6 +37,22 @@
 
 ## Learnings
 
+### 2026-03-29: Reverted window-background GIF fix — back to AbsoluteLayout approach
+
+**Problem:** The `AnimatedImageDrawable` window-background approach from f92daaf caused significantly *more* shaking than the original AbsoluteLayout wrapper, despite the theory being sound.
+
+**What was reverted:**
+- Removed `OnCreate` override and `SetAnimatedGifWindowBackground()` from `MainActivity.cs`
+- Restored `ContentPage BackgroundColor="{StaticResource BackgroundDark}"` (was `Transparent`)
+- Removed `BackgroundColor="Transparent"` from root Grid
+- Restored `<AbsoluteLayout>` GIF block as first child of root Grid
+- Moved `giphy.gif` back from `Resources/Raw/` (MauiAsset) to `Resources/Images/` (MauiImage)
+
+**What was preserved:** All circle collision improvements from 931518d (360×360 grid, arc at 180,180, FontSizeProbabilityHuge=78, KP INDEX margin).
+
+**Key lesson:** Empirical testing trumps theoretical analysis. The window-background approach is architecturally cleaner but Android's rendering pipeline produces worse visual results in practice. The AbsoluteLayout isolation approach remains the pragmatic solution for this project.
+
+
 ### 2026-03-29: Circle content collision fix
 
 **Problem:** KP INDEX, KP value, and probability helper labels were colliding with the ring arc strokes.
