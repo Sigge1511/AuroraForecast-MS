@@ -103,3 +103,26 @@ Both services now handle all I/O, parsing, and LINQ operations robustly, logging
 3. Added `using System.Globalization;` import.
 
 **Outcome:** All city names — including those with Swedish/European special characters (Å, Ä, Ö, ü, é, etc.) and hyphens — now correctly resolve via Nominatim. Predefined cities (including "Östersund" as default) continue to work as before.
+
+---
+
+### 2026-03-28: Fix auto-location never running on real devices (Issue #9 follow-up)
+
+**Problem:**
+Two bugs combined to silently break auto-location detection on every app launch.
+
+1. `OnAppearing` guarded `InitializeAsync` with `!vm.IsDataLoaded`, but the ViewModel constructor sets `IsDataLoaded = true`. The guard was therefore **always false** — `InitializeAsync` was never called. The user saw a blank welcome state with no city loaded.
+
+2. `InitializeAsync` wrapped everything in `Task.Run`. Inside that background thread, it called `Permissions.RequestAsync<LocationWhenInUse>()`. Android requires permission dialogs to be triggered from the **main thread** — calling from a background thread causes a silent failure with no dialog shown and no error thrown.
+
+**Files modified:**
+- `AuroraFix/Views/MainPage.xaml.cs` — replaced `!vm.IsDataLoaded` guard with a `_locationInitialized` bool field; set to `true` before calling `InitializeAsync` so it runs exactly once per page lifetime.
+- `AuroraFix/ViewModels/MainPageViewModel.cs` — replaced the `Task.Run` fire-and-forget wrapper with a direct `async Task` method. Removed the `MainThread.BeginInvokeOnMainThread` callback (no longer needed since we're on the main thread). Simplified city guard: `string.IsNullOrWhiteSpace(CityName)` only (no `!IsBusy` needed as `SearchCityAsync` guards `IsBusy` itself).
+
+**Learnings:**
+- Never use `IsDataLoaded` (or any ViewModel state set in constructor) as a "has this run yet" gate in a page lifecycle method — it creates a permanently-false guard.
+- `Permissions.RequestAsync` must run on the main thread on Android. `Task.Run` is an enemy of any API that touches the UI or Android activity context.
+- Fire-and-forget with `MainThread.BeginInvokeOnMainThread` is the right pattern when you intentionally want non-blocking background work + UI update. But if the caller is already on the main thread (as `OnAppearing` always is), a plain `await` is simpler and correct.
+- Page-level flags (`_locationInitialized`) are the correct tool for "run once on first appearance" logic, not ViewModel state that may be set for unrelated reasons.
+
+**PR:** https://github.com/Sigge1511/AuroraForecast-MS/pull/16
