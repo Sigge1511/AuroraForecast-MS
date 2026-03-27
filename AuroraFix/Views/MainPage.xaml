@@ -8,17 +8,11 @@
              Shell.NavBarIsVisible="False">
 
     <Grid>
-        <!--Background aurora gif — wrapped in AbsoluteLayout so animation-frame
-            InvalidateMeasure calls are absorbed locally and do not cascade up
-            to the root Grid, preventing micro-shaking on Android.-->
-        <AbsoluteLayout HorizontalOptions="Fill" VerticalOptions="Fill">
-            <Image Source="giphy.gif"
-                   Aspect="AspectFill"
-                   Opacity="0.5"
-                   IsAnimationPlaying="True"
-                   AbsoluteLayout.LayoutBounds="0,0,1,1"
-                   AbsoluteLayout.LayoutFlags="All" />
-        </AbsoluteLayout>
+        <!--Background aurora gif-->
+        <Image Source="giphy.gif"
+               Aspect="AspectFill"
+               Opacity="0.5"
+               IsAnimationPlaying="True" />
 
         <!--Gradient overlay-->
         <BoxView>
