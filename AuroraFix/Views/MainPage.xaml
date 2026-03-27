@@ -4,11 +4,23 @@
              xmlns:viewmodel="clr-namespace:AuroraFix.ViewModels"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="AuroraFix.Views.MainPage"
-             BackgroundColor="Transparent"
+             BackgroundColor="{StaticResource BackgroundDark}"
              Shell.NavBarIsVisible="False">
 
-    <Grid BackgroundColor="Transparent">
-        <!--Gradient overlay — preserves the top/bottom dark fade over the native window GIF background.-->
+    <Grid>
+        <!--Background aurora gif — wrapped in AbsoluteLayout so animation-frame
+            InvalidateMeasure calls are absorbed locally and do not cascade up
+            to the root Grid, preventing micro-shaking on Android.-->
+        <AbsoluteLayout HorizontalOptions="Fill" VerticalOptions="Fill">
+            <Image Source="giphy.gif"
+                   Aspect="AspectFill"
+                   Opacity="0.5"
+                   IsAnimationPlaying="True"
+                   AbsoluteLayout.LayoutBounds="0,0,1,1"
+                   AbsoluteLayout.LayoutFlags="All" />
+        </AbsoluteLayout>
+
+        <!--Gradient overlay-->
         <BoxView>
             <BoxView.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
