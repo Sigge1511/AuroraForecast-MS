@@ -125,7 +125,7 @@
                                FontSize="{StaticResource FontSizeActivityLevel}"
                                HorizontalOptions="Center"
                                TextColor="{StaticResource AuroraTeal}"
-                               Margin="0,-30,0,0"/>
+                               Margin="0,-25,0,0"/>
                         <Label Text="KP INDEX: "
                                FontSize="19"
                                HorizontalOptions="Center"
