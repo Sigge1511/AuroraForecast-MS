@@ -37,6 +37,23 @@
 
 ## Learnings
 
+### 2026-03-29: Circle content collision fix
+
+**Problem:** KP INDEX, KP value, and probability helper labels were colliding with the ring arc strokes.
+
+**Root cause (calculated):** `FontSizeProbabilityHuge` had been bumped to 96 (previously noted as ~90 — actually 96). Stack content height ≈ 24 + 120 + 8 + 53 + 27 = 232px inside a ring with inner diameter 288px. With TranslationY=15 the stack bottom sat at y≈291 — only ~13px clearance before the inner ring stroke edge at y=304. Android's font rendering pads lines slightly, consuming that margin and causing visible overflow/collision.
+
+**Fix applied:**
+- Grid 320×320 → 360×360; arc center updated from (160,160) to (180,180): `StartPoint="180,30"`, `Point="179.9,30"`, `Size="150,150"` unchanged (same 150px radius)
+- `FontSizeProbabilityHuge` 96 → 78 in Colors.xaml (still visually dominant; reduces stack height by ~23px)
+- KP INDEX `Margin` top: 26 → 14 (saves 12px)
+- Grid bottom `Margin` -25 → -45 (compensates for 40px taller grid so MORE card stays same visual distance)
+
+**Post-fix clearance:** Stack height ≈ 197px, inner diameter still 288px, center at (180, 195 with TranslationY). Bottom clearance ≈ 30px, top ≈ 54px — comfortable breathing room on both sides.
+
+**Key lesson:** When the ring grid size is increased without updating arc coordinates, the arc goes off-center (grid center ≠ arc center). Always update `StartPoint` and `Point` together: new top = (cx, cy − radius). Increase the negative bottom grid margin by the same amount the grid height grows to keep downstream visual spacing constant.
+
+
 ### 2026-03-28: GIF shake fix v2 — native Android window background
 
 **Problem:** The AbsoluteLayout wrapper from v1 was insufficient — shake persisted because even though layout cascading was reduced, MAUI still processed invalidate() calls from the GIF's animated drawable.
