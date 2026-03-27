@@ -31,7 +31,7 @@
 
     <!-- Aurora design tokens — font sizes -->
     <x:Double x:Key="FontSizeAppTitle">20</x:Double>
-    <x:Double x:Key="FontSizeProbabilityHuge">90</x:Double>
+    <x:Double x:Key="FontSizeProbabilityHuge">96</x:Double>
     <x:Double x:Key="FontSizeActivityLevel">30</x:Double>
     <x:Double x:Key="FontSizeBody">15</x:Double>
     <x:Double x:Key="FontSizeBodyLarge">18</x:Double>
@@ -39,7 +39,7 @@
     <x:Double x:Key="FontSizeForecastProb">20</x:Double>
     <x:Double x:Key="FontSizeForecastIcon">28</x:Double>
     <x:Double x:Key="FontSizeDarknessWindow">12</x:Double>
-    <x:Double x:Key="FontSizeLabel">15</x:Double>
+    <x:Double x:Key="FontSizeLabel">18</x:Double>
     <x:Double x:Key="FontSizeCaption">12</x:Double>
     <x:Double x:Key="FontSizeFooter">10</x:Double>
 

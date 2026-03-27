@@ -10,8 +10,8 @@ public static class ProbabilityDisplayHelper
     private const double KpLatitudeOffset = 67.0;
     private const double KpLatitudeDivisor = 1.5;
 
-    // Arc length of the full probability ring (816px circumference / 12 stroke-width units)
-    private const double CircleArcUnits = 816.0 / 12.0;
+    // Arc length of the full probability ring (942px circumference / 12 stroke-width units)
+    private const double CircleArcUnits = 942.0 / 12.0;
 
     // Cloud coverage thresholds (shared by AdjustForCloudCoverage and GetCloudImpactLabel)
     private const double CloudClearThreshold   = 15.0;

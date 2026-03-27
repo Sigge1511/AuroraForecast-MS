@@ -76,9 +76,9 @@
                           StrokeLineCap="Round">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="160,25">
-                                    <ArcSegment Point="159.9,25"
-                                                Size="135,135"
+                                <PathFigure StartPoint="160,10">
+                                    <ArcSegment Point="159.9,10"
+                                                Size="150,150"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
                                 </PathFigure>
@@ -91,9 +91,9 @@
                           StrokeDashArray="{Binding StrokeDashValues}">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="160,25">
-                                    <ArcSegment Point="159.9,25"
-                                                Size="135,135"
+                                <PathFigure StartPoint="160,10">
+                                    <ArcSegment Point="159.9,10"
+                                                Size="150,150"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
                                 </PathFigure>
@@ -102,7 +102,8 @@
                     </Path>
 
                     <VerticalStackLayout VerticalOptions="Center"
-                                         HorizontalOptions="Center">
+                                         HorizontalOptions="Center"
+                                         TranslationY="15">
                         <Label Text="PROBABILITY"
                                FontSize="{StaticResource FontSizeLabel}"
                                TextColor="{StaticResource TextSubtle}"
@@ -122,12 +123,12 @@
                                FontSize="{StaticResource FontSizeActivityLevel}"
                                HorizontalOptions="Center"
                                TextColor="{StaticResource AuroraTeal}"
-                               Margin="0,-20,0,0"/>
+                               Margin="0,-30,0,0"/>
                         <Label Text="KP INDEX: "
                                FontSize="{StaticResource FontSizeLabel}"
                                HorizontalOptions="Center"
                                TextColor="Gray"
-                               Margin="0,5,0,0"/>
+                               Margin="0,18,0,0"/>
                         <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}"
                                FontSize="{StaticResource FontSizeLabel}"
                                HorizontalOptions="Center"
