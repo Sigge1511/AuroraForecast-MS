@@ -8,11 +8,17 @@
              Shell.NavBarIsVisible="False">
 
     <Grid>
-        <!--Background aurora gif-->
-        <Image Source="giphy.gif"
-               Aspect="AspectFill"
-               Opacity="0.5"
-               IsAnimationPlaying="True" />
+        <!--Background aurora gif — wrapped in AbsoluteLayout so animation-frame
+            InvalidateMeasure calls are absorbed locally and do not cascade up
+            to the root Grid, preventing micro-shaking on Android.-->
+        <AbsoluteLayout HorizontalOptions="Fill" VerticalOptions="Fill">
+            <Image Source="giphy.gif"
+                   Aspect="AspectFill"
+                   Opacity="0.5"
+                   IsAnimationPlaying="True"
+                   AbsoluteLayout.LayoutBounds="0,0,1,1"
+                   AbsoluteLayout.LayoutFlags="All" />
+        </AbsoluteLayout>
         <BoxView>
             <BoxView.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -125,12 +131,12 @@
                                TextColor="{StaticResource AuroraTeal}"
                                Margin="0,-30,0,0"/>
                         <Label Text="KP INDEX: "
-                               FontSize="{StaticResource FontSizeLabel}"
+                               FontSize="21"
                                HorizontalOptions="Center"
                                TextColor="Gray"
-                               Margin="0,18,0,0"/>
+                               Margin="0,26,0,0"/>
                         <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}"
-                               FontSize="{StaticResource FontSizeLabel}"
+                               FontSize="21"
                                HorizontalOptions="Center"
                                TextColor="{StaticResource AuroraTeal}"/>
                     </VerticalStackLayout>

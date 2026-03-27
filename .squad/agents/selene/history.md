@@ -37,6 +37,23 @@
 
 ## Learnings
 
+### 2026-03-28: Micro-shaking on Android — animated GIF layout thrashing
+
+**Symptom:** Sigge reported visual "micro-shaking" / trembling of all UI elements on the Android emulator at all times.
+
+**What was ruled out:**
+- ViewModel: no timers, no periodic property updates — all updates are one-shot on user search action.
+- BaseViewModel: `AutoClearErrorAsync` fires once on error and uses `Task.Delay(4000)` — no polling loop.
+- Shadow on Probability Label: only repaints when `Probability` changes (on search), not continuously.
+- ScrollView: `VerticalScrollBarVisibility="Never"` is safe.
+- Bindings: no binding-driven sizes/positions in AbsoluteLayout.
+
+**Actual root cause:** `<Image Source="giphy.gif" IsAnimationPlaying="True" />` placed directly in the root `Grid`. On Android, MAUI's `Image` control with animated GIFs calls `InvalidateMeasure` on **every animation frame** (driven by Android's `AnimatedDrawable.invalidateSelf()`). Because `Grid` measures its children to determine its own size, this cascades up the full layout tree on every frame — the `Grid`, `ScrollView`, `VerticalStackLayout`, and all content children are re-measured/re-laid-out at animation speed → micro-shaking.
+
+**Fix:** Wrapped the GIF `Image` in an `AbsoluteLayout` with `AbsoluteLayout.LayoutFlags="All"` and `AbsoluteLayout.LayoutBounds="0,0,1,1"`. An `AbsoluteLayout` using proportional bounds determines child positions from its *own* already-known size rather than measuring children. This means child `InvalidateMeasure` calls are absorbed locally inside the AbsoluteLayout and do **not** propagate up to the parent Grid — breaking the layout cascade and eliminating the shaking. The GIF remains animated and visually identical.
+
+**Key lesson:** Never place an animated GIF `Image` directly in a layout container that measures children (`Grid`, `StackLayout`, `FlexLayout`). Always isolate it in an `AbsoluteLayout` with proportional bounds, or use a `MediaElement` if `CommunityToolkit.Maui` is available.
+
 ### 2026-03-21: Å/Ä/Ö cannot be typed — root cause was missing UTF-8 activeCodePage in app.manifest
 
 **Symptom:** Swedish special characters (Å, Ä, Ö) and other non-ASCII characters could not be entered in the city search Entry on Windows.
