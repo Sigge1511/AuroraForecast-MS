@@ -63,17 +63,17 @@
                 </Grid>
 
                 <!--Probability ring-->
-                <!--Grid 320×320; arc center = (160, 25+135) = (160,160) = grid center-->
-                <Grid HeightRequest="320" WidthRequest="320"
+                <!--Grid 360×360; arc center = (180, 30+150) = (180,180) = grid center-->
+                <Grid HeightRequest="360" WidthRequest="360"
                       HorizontalOptions="Center" IsVisible="{Binding IsDataLoaded}"
-                      Margin="0,0,0,-25">
+                      Margin="0,0,0,-45">
                     <Path Stroke="#20FFFFFF"
                           StrokeThickness="12"
                           StrokeLineCap="Round">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="160,10">
-                                    <ArcSegment Point="159.9,10"
+                                <PathFigure StartPoint="180,30">
+                                    <ArcSegment Point="179.9,30"
                                                 Size="150,150"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
@@ -87,8 +87,8 @@
                           StrokeDashArray="{Binding StrokeDashValues}">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure StartPoint="160,10">
-                                    <ArcSegment Point="159.9,10"
+                                <PathFigure StartPoint="180,30">
+                                    <ArcSegment Point="179.9,30"
                                                 Size="150,150"
                                                 IsLargeArc="True"
                                                 SweepDirection="Clockwise" />
@@ -124,7 +124,7 @@
                                FontSize="21"
                                HorizontalOptions="Center"
                                TextColor="Gray"
-                               Margin="0,26,0,0"/>
+                               Margin="0,14,0,0"/>
                         <Label Text="{Binding CurrentKpIndex, StringFormat='{0:F1}'}"
                                FontSize="21"
                                HorizontalOptions="Center"
