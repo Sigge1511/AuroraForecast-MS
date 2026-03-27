@@ -35,7 +35,7 @@
 
                 <!--App title-->
                 <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                    <Label Text="AURORA FORECAST"
+                    <Label Text="AURORA CATCHER"
                            CharacterSpacing="6"
                            FontSize="{StaticResource FontSizeAppTitle}"
                            TextColor="{StaticResource AuroraTeal}"

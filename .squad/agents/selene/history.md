@@ -37,6 +37,30 @@
 
 ## Learnings
 
+### 2026-03-28: App renamed from "Aurora Forecast" to "Aurora Catcher" in UI
+
+**Task:** Rename the visible app title in the GUI.
+
+**Changes made:**
+- `Views/MainPage.xaml` line 38: `Text="AURORA FORECAST"` → `Text="AURORA CATCHER"` (the header Label with `CharacterSpacing=6`, `FontFamily="MontserratBold"`, teal colour).
+- No other visible UI text occurrences of "Aurora Forecast" / "AURORA FORECAST" existed in any XAML file (confirmed by grep across all `.xaml` files).
+
+**What was NOT changed:** Code comments, variable names, namespace names, `history.md` prose references to the old name, or the GitHub repo name — only the rendered UI string.
+
+**Key lesson:** Before renaming any visible string, grep all XAML files for both the title-case and all-caps variants. In this project, the header uses all-caps (`AURORA FORECAST`) while narrative documentation uses title-case — a single grep with `-i` catches both in one pass.
+
+### 2026-03-28: KP INDEX font bump + spacing tweak in circle center
+
+**Task:** Increase visual air between the large probability % number and the circle stroke ring, by elevating the KP INDEX block (larger font + more top margin).
+
+**Changes made:**
+- `Text="KP INDEX: "` label: `FontSize` changed from `{StaticResource FontSizeLabel}` (18) → inline `21`. `Margin` changed from `0,18,0,0` → `0,26,0,0` (top margin +8pt).
+- `Text="{Binding CurrentKpIndex, ...}"` label: `FontSize` changed from `{StaticResource FontSizeLabel}` (18) → inline `21`.
+
+**Why inline instead of changing the resource?** `FontSizeLabel` (18) is also used by the "PROBABILITY" header label — changing the resource would unintentionally enlarge that label too. Surgical inline override was the right call.
+
+**Key lesson:** When multiple labels share a font-size token but only *some* need resizing, prefer inline overrides over changing the shared resource. Use the resource only if the change should apply everywhere the token is used.
+
 ### 2026-03-28: Micro-shaking on Android — animated GIF layout thrashing
 
 **Symptom:** Sigge reported visual "micro-shaking" / trembling of all UI elements on the Android emulator at all times.

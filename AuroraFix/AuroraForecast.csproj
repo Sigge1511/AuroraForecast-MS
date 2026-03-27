@@ -29,7 +29,7 @@
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
-		<ApplicationTitle>AuroraFix</ApplicationTitle>
+		<ApplicationTitle>Aurora Catcher</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.aurorafix</ApplicationId>
