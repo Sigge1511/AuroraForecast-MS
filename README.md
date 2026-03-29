@@ -30,21 +30,17 @@
 
 ## 🤖 Born from an Experiment
 
-Aurora Forecast started as a bold experiment: *what happens when you let an AI build an entire app from scratch?*
+Aurora Forecast started as an experiment in school: *let's have an AI build an entire app from scratch?*
 
-The backend — the data pipeline, probability engine, and API integrations — was architected by Claude (Anthropic's AI assistant) as part of a school assignment. The result was surprisingly solid. The logic worked. The math was right. The architecture was clean.
+The data pipeline, probability engine, and API integrations etc was surprisingly solid. But the UI? That needed a human touch.
 
-But the UI? That needed a human touch.
-
-The entire frontend was then torn down and rebuilt by me — every screen, every animation, every detail crafted to feel as magical as the aurora itself. What started as an AI experiment became a proper app, and it's still growing.
-
-The best of both worlds: machine precision meets human design. 🌌
+The entire frontend was then torn down and rebuilt by me — every animation, every detail crafted to feel as magical as the aurora itself. What started as an AI experiment became a proper app, and it's still growing.
+(Even if the season for Northern lights has passed)
 
 ---
 
 ## ✨ Features
 
-- 📍 **Auto-location on launch** — detects your city automatically via GPS (with permission) or IP fallback
 - 🌍 Search any city worldwide for real-time aurora forecasts
 - 📊 Live Kp-index data straight from NOAA's Space Weather Prediction Center
 - ☁️ Cloud coverage integration via Open-Meteo
@@ -53,8 +49,6 @@ The best of both worlds: machine precision meets human design. 🌌
 - 🧮 Animated probability display
 - ⚡ Parallel API pipeline — all data fetched simultaneously for fast results
 - 🛡️ Graceful error handling — clear overlay on failure, one tap to retry
-- 🗺️ Nordic city quick-picks: Östersund, Kiruna, Tromsø, Reykjavik, Stockholm, Oslo, Göteborg, Malmö
-- 🖥️ Cross-platform: Windows, Android, iOS, macOS
 
 ---
 
@@ -131,11 +125,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Z["📱 App launches"] --> Z1{"GPS permission?"}
-    Z1 -->|Granted| Z2["📡 Device GPS\n+ reverse geocode"]
-    Z1 -->|Denied/unavailable| Z3["🌐 IP geolocation\n(ipapi.co)"]
-    Z2 --> A
-    Z3 --> A
+    Z["📱 App launches"] 
     A["🌍 City resolved"] --> B["📍 Geocoding\n(OSM Nominatim)"]
     B --> C["🗺️ Coordinates resolved"]
     C --> D{{"⚡ Parallel API fetch"}}
@@ -147,7 +137,7 @@ flowchart TD
 ```
 
 **Step by step:**
-1. On launch, the app auto-detects your city — GPS-first (requests `LocationWhenInUse` permission), falls back to IP geolocation via `ipapi.co` if GPS is unavailable or denied
+1. On launch you search for your location.
 2. City name is resolved to GPS coordinates via Geocoding (OSM Nominatim)
 3. Four API calls fire in parallel (`Task.WhenAll`):
    - NOAA SWPC → current Kp-index (peak over last 30 min)
@@ -169,7 +159,6 @@ All APIs are completely free, open, and require no API keys.
 | ☀️ Aurora & Kp data | [NOAA SWPC](https://www.swpc.noaa.gov/) | Real-time space weather, Kp-index, 3-day forecasts |
 | ☁️ Weather & clouds | [Open-Meteo](https://open-meteo.com/) | Cloud coverage, hourly + daily weather |
 | 📍 Geocoding | [OpenStreetMap Nominatim](https://nominatim.org/) | City name → GPS coordinates |
-| 🌐 IP geolocation | [ipapi.co](https://ipapi.co/) | Auto-detect city from IP when GPS is unavailable |
 
 ---
 
@@ -226,15 +215,6 @@ At Kp 3.5 (diff +1), base probability ≈ 35%. At Kp 5 (diff +2.5), base ≈ 75%
 # Clone the repo
 git clone https://github.com/Sigge1511/AuroraForecast-MS
 
-# Open AuroraForecast.slnx in Visual Studio 2022 or 2026
-# Select your target platform (Windows / Android)
-# Hit Run — no API keys needed
-```
-
-**Requirements:**
-- .NET 10 SDK
-- Visual Studio 2022+ with the .NET MAUI workload installed
-
 ---
 
 ## 🙏 Acknowledgments
@@ -251,5 +231,4 @@ git clone https://github.com/Sigge1511/AuroraForecast-MS
 
 <p align="center">
   Made with ❤️ for aurora chasers everywhere 🌌⭐<br/>
-  <i>Never miss the Northern Lights again.</i>
 </p>
